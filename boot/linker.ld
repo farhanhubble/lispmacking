@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 

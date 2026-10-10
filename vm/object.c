@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
 #include "vm/internal.h"
 
 static bool string_equals_span(const char *string, const char *span,

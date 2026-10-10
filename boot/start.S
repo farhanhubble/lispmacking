@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
     .section .text.boot
     .globl _start
     .type _start, @function

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
 #include "platform/riscv64/platform.h"
 
 static void write_text(const char *text)

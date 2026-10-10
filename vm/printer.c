@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
 #include "vm/vm.h"
 
 static void write_text(VmWrite write, void *context, const char *text)

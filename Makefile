@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MPL-2.0
+
 CROSS ?= riscv64-elf-
 CC := $(CROSS)gcc
 QEMU ?= qemu-system-riscv64

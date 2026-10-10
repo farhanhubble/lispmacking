@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
 #ifndef LISP_MACHINE_HOSTED_PLATFORM_H
 #define LISP_MACHINE_HOSTED_PLATFORM_H
 

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+
 #include "vm/internal.h"
 
 static bool is_proper_list(const Vm *vm, const VmObject *list)
