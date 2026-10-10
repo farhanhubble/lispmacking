@@ -41,6 +41,8 @@ The shared implementation lives under `vm/`:
 - `reader.c` converts source text into Lisp objects;
 - `evaluator.c` implements special forms, primitives, closures, and
   application;
+- `machine.c` defines the explicit privileged bootstrap interface and delegates
+  its mechanisms to platform callbacks;
 - `printer.c` writes Lisp objects through a callback;
 - `vm.h` defines the public object and platform interfaces.
 
@@ -51,6 +53,7 @@ access hardware registers directly.
 Important invariants:
 
 - every Lisp value is a stable pointer to a tagged `VmObject`;
+- integers are signed 64-bit values and checked arithmetic never wraps;
 - Lisp `nil` is a unique object, not a C null pointer;
 - symbols are interned, allowing `eq` to use pointer identity;
 - environments are immutable lists of `(symbol . value)` bindings;
@@ -89,6 +92,9 @@ machine. The platform adapter under `platform/riscv64/` provides:
 - a 16-byte-aligned bump allocator over unused emulated RAM;
 - line editing for backspace and a bounded input buffer;
 - controlled shutdown through QEMU's test device.
+- a separate eight-page, downward-growing pool of zero-filled 4 KiB bootstrap
+  pages;
+- bounded access to allocated pages and allowlisted machine CSRs.
 
 The build is freestanding: it uses no host operating system and links no C
 library. QEMU is explicitly configured with 128 MiB of RAM to match the linker

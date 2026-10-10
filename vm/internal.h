@@ -15,6 +15,8 @@ VmObject *vm_environment_bind(Vm *vm, VmObject *environment,
 VmObject *vm_environment_lookup(Vm *vm, VmObject *environment,
                                 VmObject *symbol);
 bool vm_install_primitives(Vm *vm);
+bool vm_install_machine_primitives(Vm *vm);
+bool vm_bind_primitive(Vm *vm, const char *name, VmPrimitive function);
 void vm_set_error(Vm *vm, const char *message);
 
 #endif

@@ -36,6 +36,51 @@ static void skip_layout(Reader *reader)
 
 static VmObject *read_expression(Reader *reader);
 
+static VmObject *read_atom(Reader *reader, const char *start, size_t length)
+{
+    size_t index = 0;
+    bool negative = false;
+    bool numeric_candidate;
+    uint64_t magnitude = 0;
+    uint64_t limit = (uint64_t)INT64_MAX;
+
+    numeric_candidate = start[0] >= '0' && start[0] <= '9';
+    if (start[index] == '-') {
+        negative = true;
+        limit += 1;
+        ++index;
+        numeric_candidate = index < length && start[index] >= '0' &&
+                            start[index] <= '9';
+    }
+    if (index == length) {
+        return vm_intern_span(reader->vm, start, length);
+    }
+    for (; index < length; ++index) {
+        unsigned int digit;
+
+        if (start[index] < '0' || start[index] > '9') {
+            if (numeric_candidate) {
+                vm_set_error(reader->vm, "malformed integer literal");
+                return NULL;
+            }
+            return vm_intern_span(reader->vm, start, length);
+        }
+        digit = (unsigned int)(start[index] - '0');
+        if (magnitude > (limit - digit) / 10) {
+            vm_set_error(reader->vm, "integer literal out of range");
+            return NULL;
+        }
+        magnitude = magnitude * 10 + digit;
+    }
+    if (negative) {
+        if (magnitude == (uint64_t)INT64_MAX + 1) {
+            return vm_integer(reader->vm, INT64_MIN);
+        }
+        return vm_integer(reader->vm, -(int64_t)magnitude);
+    }
+    return vm_integer(reader->vm, (int64_t)magnitude);
+}
+
 static VmObject *read_list(Reader *reader)
 {
     VmObject *head = reader->vm->nil;
@@ -134,8 +179,7 @@ static VmObject *read_expression(Reader *reader)
         vm_set_error(reader->vm, "expected a symbol");
         return NULL;
     }
-    return vm_intern_span(reader->vm, start,
-                          (size_t)(reader->cursor - start));
+    return read_atom(reader, start, (size_t)(reader->cursor - start));
 }
 
 VmObject *vm_read(Vm *vm, const char *source, const char **end)

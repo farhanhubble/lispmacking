@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct Vm Vm;
 typedef struct VmObject VmObject;
@@ -13,10 +14,47 @@ typedef void *(*VmAllocate)(void *context, size_t size);
 typedef void (*VmDeallocate)(void *context, void *pointer);
 typedef void (*VmWrite)(void *context, const char *bytes, size_t length);
 
+typedef enum {
+    VM_MACHINE_OK,
+    VM_MACHINE_UNAVAILABLE,
+    VM_MACHINE_INVALID_ADDRESS,
+    VM_MACHINE_MISALIGNED,
+    VM_MACHINE_OUT_OF_MEMORY,
+    VM_MACHINE_INVALID_OPERATION,
+} VmMachineResult;
+
+typedef enum {
+    VM_CSR_MSTATUS,
+    VM_CSR_MIE,
+    VM_CSR_MTVEC,
+    VM_CSR_MSCRATCH,
+} VmCsr;
+
+typedef VmMachineResult (*VmPageAllocate)(void *context, uint64_t *address);
+typedef VmMachineResult (*VmMemoryRead)(void *context, uint64_t address,
+                                        size_t width, uint64_t *value);
+typedef VmMachineResult (*VmMemoryWrite)(void *context, uint64_t address,
+                                         size_t width, uint64_t value);
+typedef VmMachineResult (*VmCsrRead)(void *context, VmCsr csr,
+                                     uint64_t *value);
+typedef VmMachineResult (*VmCsrWrite)(void *context, VmCsr csr,
+                                      uint64_t value);
+typedef VmMachineResult (*VmInterruptsDisable)(void *context,
+                                               uint64_t *previously_enabled);
+typedef VmMachineResult (*VmInterruptsRestore)(void *context,
+                                               uint64_t previously_enabled);
+
 typedef struct {
     void *context;
     VmAllocate allocate;
     VmDeallocate deallocate;
+    VmPageAllocate page_allocate;
+    VmMemoryRead memory_read;
+    VmMemoryWrite memory_write;
+    VmCsrRead csr_read;
+    VmCsrWrite csr_write;
+    VmInterruptsDisable interrupts_disable;
+    VmInterruptsRestore interrupts_restore;
 } VmPlatform;
 
 typedef enum {
@@ -25,6 +63,7 @@ typedef enum {
     VM_CONS,
     VM_PRIMITIVE,
     VM_LAMBDA,
+    VM_INTEGER,
 } VmType;
 
 typedef VmObject *(*VmPrimitive)(Vm *vm, VmObject *arguments);
@@ -55,6 +94,7 @@ struct VmObject {
             VmObject *body;
             VmObject *environment;
         } lambda;
+        int64_t integer;
     } as;
 };
 
@@ -78,6 +118,7 @@ VmObject *vm_nil(const Vm *vm);
 VmObject *vm_true(const Vm *vm);
 VmObject *vm_intern(Vm *vm, const char *name);
 VmObject *vm_cons(Vm *vm, VmObject *car, VmObject *cdr);
+VmObject *vm_integer(Vm *vm, int64_t value);
 
 VmObject *vm_read(Vm *vm, const char *source, const char **end);
 VmObject *vm_eval(Vm *vm, VmObject *expression, VmObject *environment);

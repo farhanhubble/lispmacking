@@ -18,6 +18,9 @@ static void host_deallocate(void *context, void *pointer)
 
 VmPlatform hosted_platform(void)
 {
-    VmPlatform platform = {NULL, host_allocate, host_deallocate};
+    VmPlatform platform = {0};
+
+    platform.allocate = host_allocate;
+    platform.deallocate = host_deallocate;
     return platform;
 }

@@ -116,6 +116,16 @@ VmObject *vm_cons(Vm *vm, VmObject *car, VmObject *cdr)
     return object;
 }
 
+VmObject *vm_integer(Vm *vm, int64_t value)
+{
+    VmObject *object = vm_allocate_object(vm, VM_INTEGER);
+
+    if (object != NULL) {
+        object->as.integer = value;
+    }
+    return object;
+}
+
 VmObject *vm_make_primitive(Vm *vm, const char *name, VmPrimitive function)
 {
     VmObject *object = vm_allocate_object(vm, VM_PRIMITIVE);
@@ -215,7 +225,7 @@ bool vm_init(Vm *vm, VmPlatform platform)
         return false;
     }
     vm->global_environment = true_binding;
-    return vm_install_primitives(vm);
+    return vm_install_primitives(vm) && vm_install_machine_primitives(vm);
 }
 
 void vm_destroy(Vm *vm)

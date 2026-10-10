@@ -19,13 +19,16 @@ comparison of the two environments.
 
 ## Current status
 
-Milestones 0 through 3 are implemented:
+Milestones 0 through 4 are implemented:
 
 - RISC-V cross-toolchain and QEMU environment validated;
 - bare-metal RV64 startup, stack initialization, `.bss` clearing, and UART;
 - hosted reader, evaluator, printer, and REPL;
 - the same evaluator running interactively on bare-metal RISC-V in QEMU;
 - automated hosted and QEMU integration tests;
+- signed 64-bit integers with checked arithmetic and comparison;
+- a bounded, explicitly privileged bootstrap interface for pages, memory,
+  allowlisted CSRs, and interrupt state;
 - source-level debugging through QEMU's GDB stub.
 
 An example QEMU session:
@@ -49,8 +52,13 @@ The current language includes:
 - `atom`, `eq`, `car`, `cdr`, and `cons`;
 - `cond`;
 - lexically scoped `lambda`, closures, and application.
+- signed 64-bit integer literals;
+- checked `+`, `-`, `*`, `=`, `<`, `<=`, `>`, and `>=` primitives.
 
 Symbols are case-sensitive. The REPL accepts one expression per line.
+Machine-mode operations are visibly separated under the `bootstrap:` prefix;
+see the [machine-oriented interface](docs/machine-interface.md) for their
+contract and safety checks.
 
 ## Prerequisites
 
@@ -116,8 +124,9 @@ make test        # hosted reader/evaluator/printer tests
 make test-qemu   # cross-build and execute expressions on emulated RV64
 ```
 
-The QEMU test checks normal evaluation, lexical closure capture, type-error
-reporting, recovery after an error, and controlled shutdown.
+The QEMU test checks ordinary evaluation, integer overflow, page allocation,
+bounded memory access, CSR allowlisting, interrupt-state restoration,
+error recovery, and controlled shutdown.
 
 ## Debugging
 
@@ -155,18 +164,18 @@ docs/                 architecture and design documentation
 - The evaluator is recursive and uses a fixed 16 KiB stack in QEMU.
 - UART I/O is polling-based rather than interrupt-driven.
 - Bare-metal code currently runs entirely in RISC-V machine mode.
-- There are no integers, machine operations, compiler, isolation, IPC, or
-  capabilities yet.
+- Bootstrap machine operations currently have machine-mode authority; there is
+  no user/supervisor isolation, IPC, or capability enforcement yet.
+- There is no native Lisp compiler yet.
 
 ## Roadmap
 
 The next planned stages are:
 
-1. machine-oriented values and carefully scoped systems operations;
-2. a Lisp-written RISC-V assembler and restricted native compiler;
-3. page tables, privilege transitions, traps, scheduling, IPC, and
+1. a Lisp-written RISC-V assembler and restricted native compiler;
+2. page tables, privilege transitions, traps, scheduling, IPC, and
    capabilities;
-4. isolated user-space services and VirtIO drivers.
+3. isolated user-space services and VirtIO drivers.
 
 See the [project roadmap](docs/roadmap.md) for milestone definitions, current
 status, and acceptance criteria. The original experimental direction is

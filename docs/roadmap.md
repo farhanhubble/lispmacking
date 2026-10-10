@@ -51,11 +51,11 @@ Demonstration: `make test-qemu` cross-compiles the ELF, boots it under QEMU,
 evaluates representative expressions, checks error recovery, and exits
 cleanly.
 
-## Active direction
+## Completed machine substrate
 
 ### Milestone 4 — Machine-oriented Lisp
 
-Status: next.
+Status: complete.
 
 Add values and operations needed for systems programming without turning every
 Lisp expression into an unrestricted machine-mode operation.
@@ -86,6 +86,11 @@ Acceptance criteria:
 - a QEMU demonstration performs a bounded machine-oriented operation and then
   returns safely to the REPL;
 - `make test` and `make test-qemu` remain green.
+
+Demonstration: `make test-qemu` performs checked arithmetic, allocates distinct
+pages, stores and reloads a value through bounded memory access, validates
+alignment and range failures, round-trips the allowlisted `mscratch` CSR, and
+restores interrupt state before returning safely to the REPL.
 
 ## Planned milestones
 

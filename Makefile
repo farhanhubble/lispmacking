@@ -7,12 +7,12 @@ HOST_CC ?= cc
 
 BUILD := build
 ELF := $(BUILD)/kernel.elf
-VM_SOURCES := vm/object.c vm/reader.c vm/evaluator.c vm/printer.c
+VM_SOURCES := vm/object.c vm/reader.c vm/evaluator.c vm/machine.c vm/printer.c
 SOURCES := boot/start.S kernel/kernel.c platform/riscv64/platform.c $(VM_SOURCES)
 OBJECTS := $(patsubst %.S,$(BUILD)/%.o,$(filter %.S,$(SOURCES))) \
            $(patsubst %.c,$(BUILD)/%.o,$(filter %.c,$(SOURCES)))
 
-ARCH_FLAGS := -march=rv64imac -mabi=lp64 -mcmodel=medany
+ARCH_FLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany
 COMMON_FLAGS := $(ARCH_FLAGS) -I. -ffreestanding -fno-builtin -fno-pie \
                 -fno-stack-protector -Wall -Wextra -Werror -O2 -g
 LDFLAGS := $(ARCH_FLAGS) -nostdlib -nostartfiles -no-pie \
@@ -27,6 +27,7 @@ TEST_OBJECT := $(BUILD)/hosted/tests/vm_tests.o
 REPL := $(BUILD)/lisp-repl
 VM_TESTS := $(BUILD)/vm-tests
 HOST_FLAGS := -std=c11 -I. -Wall -Wextra -Werror -pedantic -O2 -g
+HOST_LDFLAGS ?=
 
 .PHONY: all check-tools check-host-tools run debug test-qemu hosted repl test clean
 
@@ -62,10 +63,10 @@ $(BUILD)/hosted/%.o: %.c
 	$(HOST_CC) $(HOST_FLAGS) -c $< -o $@
 
 $(REPL): $(HOST_COMMON_OBJECTS) $(REPL_OBJECT)
-	$(HOST_CC) $^ -o $@
+	$(HOST_CC) $(HOST_LDFLAGS) $^ -o $@
 
 $(VM_TESTS): $(HOST_COMMON_OBJECTS) $(TEST_OBJECT)
-	$(HOST_CC) $^ -o $@
+	$(HOST_CC) $(HOST_LDFLAGS) $^ -o $@
 
 run: all
 	$(QEMU) $(QEMU_FLAGS)
@@ -80,6 +81,23 @@ test-qemu: all
 		printf "%s\n" "(((lambda (x) (lambda (y) (cons x (cons y nil)))) 'a) 'b)"; \
 		printf "%s\n" "(car 'a)"; \
 		printf "%s\n" "(cond ((eq 'a 'b) 'wrong) (t 'right))"; \
+		printf "%s\n" "(+ (* 6 7) (- 5 5))"; \
+		printf "%s\n" "-9223372036854775808"; \
+		printf "%s\n" "12oops"; \
+		printf "%s\n" "(+ 9223372036854775807 1)"; \
+		printf "%s\n" "((lambda (a) ((lambda (b) (= (- a b) 4096)) (bootstrap:page-allocate))) (bootstrap:page-allocate))"; \
+		printf "%s\n" "((lambda (page) ((lambda (ignored) (bootstrap:load-u64 page)) (bootstrap:store-u64 page 42))) (bootstrap:page-allocate))"; \
+		printf "%s\n" "((lambda (page) ((lambda (ignored) (bootstrap:load-u8 page)) (bootstrap:store-u8 page 255))) (bootstrap:page-allocate))"; \
+		printf "%s\n" "((lambda (page) ((lambda (ignored) (bootstrap:load-u16 page)) (bootstrap:store-u16 page 65535))) (bootstrap:page-allocate))"; \
+		printf "%s\n" "((lambda (page) ((lambda (ignored) (bootstrap:load-u32 page)) (bootstrap:store-u32 page 4294967295))) (bootstrap:page-allocate))"; \
+		printf "%s\n" "((lambda (page) (bootstrap:load-u64 (+ page 1))) (bootstrap:page-allocate))"; \
+		printf "%s\n" "((lambda (page) (bootstrap:store-u8 page 256)) (bootstrap:page-allocate))"; \
+		printf "%s\n" "(bootstrap:page-allocate)"; \
+		printf "%s\n" "(bootstrap:load-u8 0)"; \
+		printf "%s\n" "((lambda (ignored) (bootstrap:csr-read 'mscratch)) (bootstrap:csr-write 'mscratch 123))"; \
+		printf "%s\n" "(bootstrap:csr-read 'cycle)"; \
+		printf "%s\n" "(bootstrap:interrupts-restore 2)"; \
+		printf "%s\n" "((lambda (token) (bootstrap:interrupts-restore token)) (bootstrap:interrupts-disable))"; \
 		printf "\004"; \
 	} | $(QEMU) $(QEMU_FLAGS) > $(BUILD)/qemu-output.txt
 	@tr -d '\r' < $(BUILD)/qemu-output.txt > $(BUILD)/qemu-output.normalized.txt
@@ -88,6 +106,22 @@ test-qemu: all
 	@grep -Fxq "(a b)" $(BUILD)/qemu-output.normalized.txt
 	@grep -Fxq "error: car expects a cons" $(BUILD)/qemu-output.normalized.txt
 	@grep -Fxq "right" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "42" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq -- "-9223372036854775808" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: malformed integer literal" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "255" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "65535" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "4294967295" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: integer addition overflow" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "t" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: address does not satisfy access alignment" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: stored value does not fit the requested width" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: no bootstrap pages remain" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: address is outside allocated bootstrap pages" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "123" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: CSR is not allowlisted" $(BUILD)/qemu-output.normalized.txt
+	@grep -Fxq "error: interrupt restore token must be 0 or 1" $(BUILD)/qemu-output.normalized.txt
+	@grep -Eq "^(0|1)$$" $(BUILD)/qemu-output.normalized.txt
 	@cat $(BUILD)/qemu-output.txt
 
 hosted: check-host-tools $(REPL)

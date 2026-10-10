@@ -26,6 +26,146 @@ static bool exactly_two_arguments(const Vm *vm, const VmObject *arguments)
            arguments->as.cons.cdr->as.cons.cdr == vm->nil;
 }
 
+static bool integer_arguments(Vm *vm, VmObject *arguments, int64_t *first,
+                              int64_t *second, const char *message)
+{
+    if (!exactly_two_arguments(vm, arguments) ||
+        arguments->as.cons.car->type != VM_INTEGER ||
+        arguments->as.cons.cdr->as.cons.car->type != VM_INTEGER) {
+        vm_set_error(vm, message);
+        return false;
+    }
+    *first = arguments->as.cons.car->as.integer;
+    *second = arguments->as.cons.cdr->as.cons.car->as.integer;
+    return true;
+}
+
+static VmObject *primitive_add(Vm *vm, VmObject *arguments)
+{
+    int64_t first;
+    int64_t second;
+
+    if (!integer_arguments(vm, arguments, &first, &second,
+                           "+ expects two integers")) {
+        return NULL;
+    }
+    if ((second > 0 && first > INT64_MAX - second) ||
+        (second < 0 && first < INT64_MIN - second)) {
+        vm_set_error(vm, "integer addition overflow");
+        return NULL;
+    }
+    return vm_integer(vm, first + second);
+}
+
+static VmObject *primitive_subtract(Vm *vm, VmObject *arguments)
+{
+    int64_t first;
+    int64_t second;
+
+    if (!integer_arguments(vm, arguments, &first, &second,
+                           "- expects two integers")) {
+        return NULL;
+    }
+    if ((second < 0 && first > INT64_MAX + second) ||
+        (second > 0 && first < INT64_MIN + second)) {
+        vm_set_error(vm, "integer subtraction overflow");
+        return NULL;
+    }
+    return vm_integer(vm, first - second);
+}
+
+static VmObject *primitive_multiply(Vm *vm, VmObject *arguments)
+{
+    int64_t first;
+    int64_t second;
+    bool negative;
+    uint64_t first_magnitude;
+    uint64_t second_magnitude;
+    uint64_t limit;
+    uint64_t product;
+
+    if (!integer_arguments(vm, arguments, &first, &second,
+                           "* expects two integers")) {
+        return NULL;
+    }
+    negative = (first < 0) != (second < 0);
+    first_magnitude = first < 0 ? (uint64_t)(-(first + 1)) + 1
+                                : (uint64_t)first;
+    second_magnitude = second < 0 ? (uint64_t)(-(second + 1)) + 1
+                                  : (uint64_t)second;
+    limit = (uint64_t)INT64_MAX + (negative ? 1u : 0u);
+    if (second_magnitude != 0 &&
+        first_magnitude > limit / second_magnitude) {
+        vm_set_error(vm, "integer multiplication overflow");
+        return NULL;
+    }
+    product = first_magnitude * second_magnitude;
+    if (negative) {
+        if (product == (uint64_t)INT64_MAX + 1) {
+            return vm_integer(vm, INT64_MIN);
+        }
+        return vm_integer(vm, -(int64_t)product);
+    }
+    return vm_integer(vm, (int64_t)product);
+}
+
+typedef bool (*IntegerComparison)(int64_t first, int64_t second);
+
+static bool compare_equal(int64_t first, int64_t second)
+{
+    return first == second;
+}
+
+static bool compare_less(int64_t first, int64_t second)
+{
+    return first < second;
+}
+
+static bool compare_less_equal(int64_t first, int64_t second)
+{
+    return first <= second;
+}
+
+static bool compare_greater(int64_t first, int64_t second)
+{
+    return first > second;
+}
+
+static bool compare_greater_equal(int64_t first, int64_t second)
+{
+    return first >= second;
+}
+
+static VmObject *compare_integers(Vm *vm, VmObject *arguments,
+                                  IntegerComparison comparison,
+                                  const char *message)
+{
+    int64_t first;
+    int64_t second;
+
+    if (!integer_arguments(vm, arguments, &first, &second, message)) {
+        return NULL;
+    }
+    return comparison(first, second) ? vm->true_value : vm->nil;
+}
+
+#define DEFINE_COMPARISON_PRIMITIVE(function_name, comparison, message)       \
+    static VmObject *function_name(Vm *vm, VmObject *arguments)               \
+    {                                                                          \
+        return compare_integers(vm, arguments, comparison, message);           \
+    }
+
+DEFINE_COMPARISON_PRIMITIVE(primitive_number_equal, compare_equal,
+                            "= expects two integers")
+DEFINE_COMPARISON_PRIMITIVE(primitive_less, compare_less,
+                            "< expects two integers")
+DEFINE_COMPARISON_PRIMITIVE(primitive_less_equal, compare_less_equal,
+                            "<= expects two integers")
+DEFINE_COMPARISON_PRIMITIVE(primitive_greater, compare_greater,
+                            "> expects two integers")
+DEFINE_COMPARISON_PRIMITIVE(primitive_greater_equal, compare_greater_equal,
+                            ">= expects two integers")
+
 static VmObject *primitive_atom(Vm *vm, VmObject *arguments)
 {
     if (!exactly_one_argument(vm, arguments)) {
@@ -91,7 +231,7 @@ static VmObject *primitive_cons(Vm *vm, VmObject *arguments)
                    arguments->as.cons.cdr->as.cons.car);
 }
 
-static bool bind_primitive(Vm *vm, const char *name, VmPrimitive function)
+bool vm_bind_primitive(Vm *vm, const char *name, VmPrimitive function)
 {
     VmObject *symbol = vm_intern(vm, name);
     VmObject *primitive = vm_make_primitive(vm, name, function);
@@ -111,11 +251,19 @@ static bool bind_primitive(Vm *vm, const char *name, VmPrimitive function)
 
 bool vm_install_primitives(Vm *vm)
 {
-    return bind_primitive(vm, "atom", primitive_atom) &&
-           bind_primitive(vm, "eq", primitive_eq) &&
-           bind_primitive(vm, "car", primitive_car) &&
-           bind_primitive(vm, "cdr", primitive_cdr) &&
-           bind_primitive(vm, "cons", primitive_cons);
+    return vm_bind_primitive(vm, "atom", primitive_atom) &&
+           vm_bind_primitive(vm, "eq", primitive_eq) &&
+           vm_bind_primitive(vm, "car", primitive_car) &&
+           vm_bind_primitive(vm, "cdr", primitive_cdr) &&
+           vm_bind_primitive(vm, "cons", primitive_cons) &&
+           vm_bind_primitive(vm, "+", primitive_add) &&
+           vm_bind_primitive(vm, "-", primitive_subtract) &&
+           vm_bind_primitive(vm, "*", primitive_multiply) &&
+           vm_bind_primitive(vm, "=", primitive_number_equal) &&
+           vm_bind_primitive(vm, "<", primitive_less) &&
+           vm_bind_primitive(vm, "<=", primitive_less_equal) &&
+           vm_bind_primitive(vm, ">", primitive_greater) &&
+           vm_bind_primitive(vm, ">=", primitive_greater_equal);
 }
 
 static VmObject *eval_arguments(Vm *vm, VmObject *expressions,
@@ -268,7 +416,7 @@ VmObject *vm_eval(Vm *vm, VmObject *expression, VmObject *environment)
         return NULL;
     }
     if (expression->type == VM_NIL || expression->type == VM_PRIMITIVE ||
-        expression->type == VM_LAMBDA) {
+        expression->type == VM_LAMBDA || expression->type == VM_INTEGER) {
         return expression;
     }
     if (expression->type == VM_SYMBOL) {

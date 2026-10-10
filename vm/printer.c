@@ -12,6 +12,28 @@ static void write_text(VmWrite write, void *context, const char *text)
     write(context, text, length);
 }
 
+static void print_integer(int64_t value, VmWrite write, void *context)
+{
+    char digits[21];
+    size_t length = 0;
+    uint64_t magnitude;
+
+    if (value < 0) {
+        write_text(write, context, "-");
+        magnitude = (uint64_t)(-(value + 1)) + 1;
+    } else {
+        magnitude = (uint64_t)value;
+    }
+    do {
+        digits[length++] = (char)('0' + magnitude % 10);
+        magnitude /= 10;
+    } while (magnitude != 0);
+    while (length != 0) {
+        --length;
+        write(context, &digits[length], 1);
+    }
+}
+
 static void print_object(const VmObject *object, VmWrite write, void *context)
 {
     const VmObject *cursor;
@@ -46,6 +68,9 @@ static void print_object(const VmObject *object, VmWrite write, void *context)
         break;
     case VM_LAMBDA:
         write_text(write, context, "<lambda>");
+        break;
+    case VM_INTEGER:
+        print_integer(object->as.integer, write, context);
         break;
     }
 }
