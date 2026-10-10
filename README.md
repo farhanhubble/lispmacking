@@ -168,8 +168,9 @@ The next planned stages are:
    capabilities;
 4. isolated user-space services and VirtIO drivers.
 
-The full experimental roadmap is recorded in
-[CODEX_LISP_MICROKERNEL_BRIEF.md](CODEX_LISP_MICROKERNEL_BRIEF.md).
+See the [project roadmap](docs/roadmap.md) for milestone definitions, current
+status, and acceptance criteria. The original experimental direction is
+recorded in [CODEX_LISP_MICROKERNEL_BRIEF.md](CODEX_LISP_MICROKERNEL_BRIEF.md).
 
 ## License
 
