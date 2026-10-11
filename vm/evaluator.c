@@ -109,6 +109,69 @@ static VmObject *primitive_multiply(Vm *vm, VmObject *arguments)
     return vm_integer(vm, (int64_t)product);
 }
 
+static VmObject *primitive_quotient(Vm *vm, VmObject *arguments)
+{
+    int64_t first;
+    int64_t second;
+
+    if (!integer_arguments(vm, arguments, &first, &second,
+                           "quotient expects two integers")) {
+        return NULL;
+    }
+    if (second == 0) {
+        vm_set_error(vm, "integer division by zero");
+        return NULL;
+    }
+    if (first == INT64_MIN && second == -1) {
+        vm_set_error(vm, "integer division overflow");
+        return NULL;
+    }
+    return vm_integer(vm, first / second);
+}
+
+static VmObject *primitive_mod(Vm *vm, VmObject *arguments)
+{
+    int64_t first;
+    int64_t second;
+
+    if (!integer_arguments(vm, arguments, &first, &second,
+                           "mod expects two integers")) {
+        return NULL;
+    }
+    if (second == 0) {
+        vm_set_error(vm, "integer division by zero");
+        return NULL;
+    }
+    if (first == INT64_MIN && second == -1) {
+        return vm_integer(vm, 0);
+    }
+    return vm_integer(vm, first % second);
+}
+
+static VmObject *primitive_integer_p(Vm *vm, VmObject *arguments)
+{
+    if (!exactly_one_argument(vm, arguments)) {
+        vm_set_error(vm, "integer? expects one argument");
+        return NULL;
+    }
+    return arguments->as.cons.car->type == VM_INTEGER ? vm->true_value
+                                                       : vm->nil;
+}
+
+static VmObject *primitive_error(Vm *vm, VmObject *arguments)
+{
+    VmObject *message;
+
+    if (!exactly_one_argument(vm, arguments) ||
+        arguments->as.cons.car->type != VM_SYMBOL) {
+        vm_set_error(vm, "error expects one quoted symbol");
+        return NULL;
+    }
+    message = arguments->as.cons.car;
+    vm_set_error(vm, message->as.symbol.name);
+    return NULL;
+}
+
 typedef bool (*IntegerComparison)(int64_t first, int64_t second);
 
 static bool compare_equal(int64_t first, int64_t second)
@@ -259,11 +322,15 @@ bool vm_install_primitives(Vm *vm)
            vm_bind_primitive(vm, "+", primitive_add) &&
            vm_bind_primitive(vm, "-", primitive_subtract) &&
            vm_bind_primitive(vm, "*", primitive_multiply) &&
+           vm_bind_primitive(vm, "quotient", primitive_quotient) &&
+           vm_bind_primitive(vm, "mod", primitive_mod) &&
            vm_bind_primitive(vm, "=", primitive_number_equal) &&
            vm_bind_primitive(vm, "<", primitive_less) &&
            vm_bind_primitive(vm, "<=", primitive_less_equal) &&
            vm_bind_primitive(vm, ">", primitive_greater) &&
-           vm_bind_primitive(vm, ">=", primitive_greater_equal);
+           vm_bind_primitive(vm, ">=", primitive_greater_equal) &&
+           vm_bind_primitive(vm, "integer?", primitive_integer_p) &&
+           vm_bind_primitive(vm, "error", primitive_error);
 }
 
 static VmObject *eval_arguments(Vm *vm, VmObject *expressions,
@@ -386,6 +453,62 @@ static VmObject *eval_lambda(Vm *vm, VmObject *arguments,
                           environment);
 }
 
+static VmObject *eval_define(Vm *vm, VmObject *arguments,
+                             VmObject *environment)
+{
+    VmObject *symbol;
+    VmObject *value;
+    VmObject *new_environment;
+    VmObject *binding;
+
+    if (vm->evaluation_depth != 1 || environment != vm->global_environment) {
+        vm_set_error(vm, "define is only valid at top level");
+        return NULL;
+    }
+    if (!exactly_two_arguments(vm, arguments)) {
+        vm_set_error(vm, "define requires a symbol and value");
+        return NULL;
+    }
+    symbol = arguments->as.cons.car;
+    if (symbol->type != VM_SYMBOL) {
+        vm_set_error(vm, "define name must be a symbol");
+        return NULL;
+    }
+    new_environment = vm_environment_bind(vm, vm->global_environment,
+                                          symbol, vm->nil);
+    if (new_environment == NULL) {
+        return NULL;
+    }
+    value = vm_eval(vm, arguments->as.cons.cdr->as.cons.car,
+                    new_environment);
+    if (value == NULL) {
+        return NULL;
+    }
+    binding = new_environment->as.cons.car;
+    binding->as.cons.cdr = value;
+    vm->global_environment = new_environment;
+    return value;
+}
+
+static VmObject *eval_begin(Vm *vm, VmObject *expressions,
+                            VmObject *environment)
+{
+    VmObject *result = vm->nil;
+
+    while (expressions != vm->nil) {
+        if (expressions->type != VM_CONS) {
+            vm_set_error(vm, "begin expressions must form a proper list");
+            return NULL;
+        }
+        result = vm_eval(vm, expressions->as.cons.car, environment);
+        if (result == NULL) {
+            return NULL;
+        }
+        expressions = expressions->as.cons.cdr;
+    }
+    return result;
+}
+
 static VmObject *apply(Vm *vm, VmObject *function, VmObject *arguments)
 {
     if (function->type == VM_PRIMITIVE) {
@@ -404,7 +527,8 @@ static VmObject *apply(Vm *vm, VmObject *function, VmObject *arguments)
     return NULL;
 }
 
-VmObject *vm_eval(Vm *vm, VmObject *expression, VmObject *environment)
+static VmObject *eval_expression(Vm *vm, VmObject *expression,
+                                 VmObject *environment)
 {
     VmObject *operator_expression;
     VmObject *arguments;
@@ -442,6 +566,12 @@ VmObject *vm_eval(Vm *vm, VmObject *expression, VmObject *environment)
     if (operator_expression == vm->lambda_symbol) {
         return eval_lambda(vm, arguments, environment);
     }
+    if (operator_expression == vm->define_symbol) {
+        return eval_define(vm, arguments, environment);
+    }
+    if (operator_expression == vm->begin_symbol) {
+        return eval_begin(vm, arguments, environment);
+    }
 
     function = vm_eval(vm, operator_expression, environment);
     if (function == NULL) {
@@ -452,6 +582,16 @@ VmObject *vm_eval(Vm *vm, VmObject *expression, VmObject *environment)
         return NULL;
     }
     return apply(vm, function, values);
+}
+
+VmObject *vm_eval(Vm *vm, VmObject *expression, VmObject *environment)
+{
+    VmObject *result;
+
+    ++vm->evaluation_depth;
+    result = eval_expression(vm, expression, environment);
+    --vm->evaluation_depth;
+    return result;
 }
 
 VmObject *vm_eval_source(Vm *vm, const char *source)

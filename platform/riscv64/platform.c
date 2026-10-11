@@ -24,6 +24,7 @@ typedef struct {
     uintptr_t page_current;
     uintptr_t page_limit;
     uintptr_t end;
+    bool executable_pages[BOOTSTRAP_PAGE_COUNT];
 } Arena;
 
 extern unsigned char __heap_start[];
@@ -66,10 +67,12 @@ static void *arena_allocate(void *context, size_t size)
     return (void *)result;
 }
 
-static VmMachineResult page_allocate(void *context, uint64_t *address)
+static VmMachineResult allocate_page(void *context, uint64_t *address,
+                                     bool executable)
 {
     Arena *allocator = context;
     uintptr_t page;
+    size_t page_index;
     size_t index;
 
     if (allocator->page_current < PAGE_SIZE) {
@@ -80,11 +83,23 @@ static VmMachineResult page_allocate(void *context, uint64_t *address)
         return VM_MACHINE_OUT_OF_MEMORY;
     }
     allocator->page_current = page;
+    page_index = (allocator->end - page) / PAGE_SIZE - 1;
+    allocator->executable_pages[page_index] = executable;
     for (index = 0; index < PAGE_SIZE; ++index) {
         ((volatile uint8_t *)page)[index] = 0;
     }
     *address = (uint64_t)page;
     return VM_MACHINE_OK;
+}
+
+static VmMachineResult page_allocate(void *context, uint64_t *address)
+{
+    return allocate_page(context, address, false);
+}
+
+static VmMachineResult code_page_allocate(void *context, uint64_t *address)
+{
+    return allocate_page(context, address, true);
 }
 
 static VmMachineResult validate_access(const Arena *allocator,
@@ -216,6 +231,37 @@ static VmMachineResult interrupts_restore(void *context,
     return VM_MACHINE_OK;
 }
 
+static VmMachineResult native_call(void *context, uint64_t address,
+                                   uint64_t argument, uint64_t *result)
+{
+    typedef int64_t (*NativeFunction)(int64_t argument_value);
+    Arena *allocator = context;
+    VmMachineResult validation = validate_access(allocator, address, 4);
+    NativeFunction function;
+    size_t page_index;
+    int64_t signed_argument;
+    int64_t signed_result;
+
+    if (validation != VM_MACHINE_OK) {
+        return validation;
+    }
+    page_index = (allocator->end - 1 - (uintptr_t)address) / PAGE_SIZE;
+    if (page_index >= BOOTSTRAP_PAGE_COUNT ||
+        !allocator->executable_pages[page_index]) {
+        return VM_MACHINE_NOT_EXECUTABLE;
+    }
+    if (argument <= (uint64_t)INT64_MAX) {
+        signed_argument = (int64_t)argument;
+    } else {
+        signed_argument = -1 - (int64_t)(UINT64_MAX - argument);
+    }
+    __asm__ volatile("fence.i" : : : "memory");
+    function = (NativeFunction)(uintptr_t)address;
+    signed_result = function(signed_argument);
+    *result = (uint64_t)signed_result;
+    return VM_MACHINE_OK;
+}
+
 static void arena_deallocate(void *context, void *pointer)
 {
     (void)context;
@@ -225,23 +271,29 @@ static void arena_deallocate(void *context, void *pointer)
 VmPlatform riscv64_platform(void)
 {
     VmPlatform platform;
+    size_t index;
 
     arena.current = (uintptr_t)__heap_start;
     arena.page_current = (uintptr_t)__heap_end;
     arena.page_limit = (uintptr_t)__heap_end -
                        BOOTSTRAP_PAGE_COUNT * PAGE_SIZE;
     arena.end = (uintptr_t)__heap_end;
+    for (index = 0; index < BOOTSTRAP_PAGE_COUNT; ++index) {
+        arena.executable_pages[index] = false;
+    }
     platform = (VmPlatform){0};
     platform.context = &arena;
     platform.allocate = arena_allocate;
     platform.deallocate = arena_deallocate;
     platform.page_allocate = page_allocate;
+    platform.code_page_allocate = code_page_allocate;
     platform.memory_read = memory_read;
     platform.memory_write = memory_write;
     platform.csr_read = csr_read;
     platform.csr_write = csr_write;
     platform.interrupts_disable = interrupts_disable;
     platform.interrupts_restore = interrupts_restore;
+    platform.native_call = native_call;
     return platform;
 }
 

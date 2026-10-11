@@ -21,6 +21,7 @@ typedef enum {
     VM_MACHINE_MISALIGNED,
     VM_MACHINE_OUT_OF_MEMORY,
     VM_MACHINE_INVALID_OPERATION,
+    VM_MACHINE_NOT_EXECUTABLE,
 } VmMachineResult;
 
 typedef enum {
@@ -43,18 +44,22 @@ typedef VmMachineResult (*VmInterruptsDisable)(void *context,
                                                uint64_t *previously_enabled);
 typedef VmMachineResult (*VmInterruptsRestore)(void *context,
                                                uint64_t previously_enabled);
+typedef VmMachineResult (*VmNativeCall)(void *context, uint64_t address,
+                                        uint64_t argument, uint64_t *result);
 
 typedef struct {
     void *context;
     VmAllocate allocate;
     VmDeallocate deallocate;
     VmPageAllocate page_allocate;
+    VmPageAllocate code_page_allocate;
     VmMemoryRead memory_read;
     VmMemoryWrite memory_write;
     VmCsrRead csr_read;
     VmCsrWrite csr_write;
     VmInterruptsDisable interrupts_disable;
     VmInterruptsRestore interrupts_restore;
+    VmNativeCall native_call;
 } VmPlatform;
 
 typedef enum {
@@ -107,7 +112,10 @@ struct Vm {
     VmObject *quote_symbol;
     VmObject *cond_symbol;
     VmObject *lambda_symbol;
+    VmObject *define_symbol;
+    VmObject *begin_symbol;
     VmObject *global_environment;
+    size_t evaluation_depth;
     char error[160];
 };
 

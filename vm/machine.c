@@ -40,6 +40,9 @@ static void set_machine_error(Vm *vm, VmMachineResult result)
     case VM_MACHINE_INVALID_OPERATION:
         vm_set_error(vm, "privileged operation is not allowlisted");
         break;
+    case VM_MACHINE_NOT_EXECUTABLE:
+        vm_set_error(vm, "address is not in an executable bootstrap page");
+        break;
     }
 }
 
@@ -74,6 +77,31 @@ static VmObject *primitive_page_allocate(Vm *vm, VmObject *arguments)
     }
     if (address > (uint64_t)INT64_MAX) {
         vm_set_error(vm, "page address cannot be represented as an integer");
+        return NULL;
+    }
+    return vm_integer(vm, (int64_t)address);
+}
+
+static VmObject *primitive_code_page_allocate(Vm *vm, VmObject *arguments)
+{
+    uint64_t address;
+    VmMachineResult result;
+
+    if (!exactly_no_arguments(vm, arguments)) {
+        vm_set_error(vm, "bootstrap:code-page-allocate expects no arguments");
+        return NULL;
+    }
+    if (vm->platform.code_page_allocate == NULL) {
+        set_machine_error(vm, VM_MACHINE_UNAVAILABLE);
+        return NULL;
+    }
+    result = vm->platform.code_page_allocate(vm->platform.context, &address);
+    if (result != VM_MACHINE_OK) {
+        set_machine_error(vm, result);
+        return NULL;
+    }
+    if (address > (uint64_t)INT64_MAX) {
+        vm_set_error(vm, "code page address cannot be represented as an integer");
         return NULL;
     }
     return vm_integer(vm, (int64_t)address);
@@ -323,10 +351,55 @@ static VmObject *primitive_interrupts_restore(Vm *vm, VmObject *arguments)
     return vm_integer(vm, (int64_t)previous);
 }
 
+static VmObject *primitive_call_native(Vm *vm, VmObject *arguments)
+{
+    VmObject *argument_object;
+    uint64_t address;
+    uint64_t argument;
+    uint64_t result_value;
+    int64_t signed_result;
+    VmMachineResult result;
+
+    if (!exactly_two_arguments(vm, arguments)) {
+        vm_set_error(vm,
+                     "bootstrap:call-native expects integer address and argument");
+        return NULL;
+    }
+    argument_object = arguments->as.cons.cdr->as.cons.car;
+    if (!integer_argument(vm, arguments->as.cons.car, &address,
+                          "bootstrap:call-native expects integer address and argument") ||
+        !integer_argument(vm, argument_object, &argument,
+                          "bootstrap:call-native expects integer address and argument")) {
+        return NULL;
+    }
+    if (arguments->as.cons.car->as.integer < 0) {
+        vm_set_error(vm, "native entry address must be non-negative");
+        return NULL;
+    }
+    if (vm->platform.native_call == NULL) {
+        set_machine_error(vm, VM_MACHINE_UNAVAILABLE);
+        return NULL;
+    }
+    result = vm->platform.native_call(vm->platform.context, address, argument,
+                                      &result_value);
+    if (result != VM_MACHINE_OK) {
+        set_machine_error(vm, result);
+        return NULL;
+    }
+    if (result_value <= (uint64_t)INT64_MAX) {
+        signed_result = (int64_t)result_value;
+    } else {
+        signed_result = -1 - (int64_t)(UINT64_MAX - result_value);
+    }
+    return vm_integer(vm, signed_result);
+}
+
 bool vm_install_machine_primitives(Vm *vm)
 {
     return vm_bind_primitive(vm, "bootstrap:page-allocate",
                              primitive_page_allocate) &&
+           vm_bind_primitive(vm, "bootstrap:code-page-allocate",
+                             primitive_code_page_allocate) &&
            vm_bind_primitive(vm, "bootstrap:load-u8", primitive_load_u8) &&
            vm_bind_primitive(vm, "bootstrap:load-u16", primitive_load_u16) &&
            vm_bind_primitive(vm, "bootstrap:load-u32", primitive_load_u32) &&
@@ -340,5 +413,7 @@ bool vm_install_machine_primitives(Vm *vm)
            vm_bind_primitive(vm, "bootstrap:interrupts-disable",
                              primitive_interrupts_disable) &&
            vm_bind_primitive(vm, "bootstrap:interrupts-restore",
-                             primitive_interrupts_restore);
+                             primitive_interrupts_restore) &&
+           vm_bind_primitive(vm, "bootstrap:call-native",
+                             primitive_call_native);
 }

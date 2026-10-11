@@ -56,7 +56,8 @@ Important invariants:
 - integers are signed 64-bit values and checked arithmetic never wraps;
 - Lisp `nil` is a unique object, not a C null pointer;
 - symbols are interned, allowing `eq` to use pointer identity;
-- environments are immutable lists of `(symbol . value)` bindings;
+- environments are persistent lists of `(symbol . value)` bindings; `define`
+  seals one provisional binding to support self-recursive closures;
 - lambdas retain the environment in which they were evaluated;
 - objects currently live until the VM is destroyed or the machine restarts.
 
@@ -91,14 +92,28 @@ machine. The platform adapter under `platform/riscv64/` provides:
 - polling input and output through the memory-mapped 16550-compatible UART;
 - a 16-byte-aligned bump allocator over unused emulated RAM;
 - line editing for backspace and a bounded input buffer;
-- controlled shutdown through QEMU's test device.
+- controlled shutdown through QEMU's test device;
 - a separate eight-page, downward-growing pool of zero-filled 4 KiB bootstrap
   pages;
-- bounded access to allocated pages and allowlisted machine CSRs.
+- bounded access to allocated pages and allowlisted machine CSRs;
+- explicit code-page tracking and a validated native-call boundary with
+  instruction-cache synchronization.
 
 The build is freestanding: it uses no host operating system and links no C
 library. QEMU is explicitly configured with 128 MiB of RAM to match the linker
 map.
+
+## Lisp bootstrap compiler
+
+The Milestone 5 assembler and compiler live under `lisp/`. They are not linked
+into the C evaluator and contain no C implementation shortcuts: the REPL reads
+their definitions as Lisp, and those functions calculate instruction words and
+write them through the machine interface.
+
+The compiler assigns fixed slots in one executable bootstrap page, traverses a
+restricted function representation, emits RV64IM instructions, patches local
+branches, and resolves calls between generated functions. See the
+[compiler reference](compiler.md) for the source subset, ABI, and limitations.
 
 ## Portability boundaries
 
@@ -109,7 +124,7 @@ map, allocator, and console adapter, while the VM sources should remain shared.
 
 The current bare-metal adapter is specifically tied to:
 
-- RISC-V RV64IMAC;
+- RISC-V RV64IMAC with the Zicsr and Zifencei extensions;
 - QEMU's `virt` memory map;
 - its 16550-compatible UART and test device.
 

@@ -14,7 +14,7 @@ static void write_text(const char *text)
 
 _Noreturn void kernel_main(void)
 {
-    static char line[512];
+    static char line[4096];
     Vm vm;
 
     write_text("Lisp machine booted.\r\n");
@@ -35,7 +35,7 @@ _Noreturn void kernel_main(void)
             break;
         }
         if (line_result == RISCV64_LINE_TOO_LONG) {
-            write_text("error: input exceeds 511 characters\r\n");
+            write_text("error: input exceeds 4095 characters\r\n");
             continue;
         }
         if (line[0] == '\0') {

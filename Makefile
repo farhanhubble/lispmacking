@@ -12,7 +12,7 @@ SOURCES := boot/start.S kernel/kernel.c platform/riscv64/platform.c $(VM_SOURCES
 OBJECTS := $(patsubst %.S,$(BUILD)/%.o,$(filter %.S,$(SOURCES))) \
            $(patsubst %.c,$(BUILD)/%.o,$(filter %.c,$(SOURCES)))
 
-ARCH_FLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany
+ARCH_FLAGS := -march=rv64imac_zicsr_zifencei -mabi=lp64 -mcmodel=medany
 COMMON_FLAGS := $(ARCH_FLAGS) -I. -ffreestanding -fno-builtin -fno-pie \
                 -fno-stack-protector -Wall -Wextra -Werror -O2 -g
 LDFLAGS := $(ARCH_FLAGS) -nostdlib -nostartfiles -no-pie \
@@ -29,7 +29,8 @@ VM_TESTS := $(BUILD)/vm-tests
 HOST_FLAGS := -std=c11 -I. -Wall -Wextra -Werror -pedantic -O2 -g
 HOST_LDFLAGS ?=
 
-.PHONY: all check-tools check-host-tools run debug test-qemu hosted repl test clean
+.PHONY: all check-tools check-host-tools run debug test-qemu test-qemu-m4 \
+	test-qemu-m5 hosted repl test test-compiler-hosted clean
 
 all: check-tools $(ELF)
 
@@ -75,7 +76,9 @@ debug: all
 	@echo "QEMU paused; connect with: riscv64-elf-gdb $(ELF) -ex 'target remote :1234'"
 	$(QEMU) $(QEMU_FLAGS) -S -s
 
-test-qemu: all
+test-qemu: test-qemu-m4 test-qemu-m5
+
+test-qemu-m4: all
 	@{ \
 		printf "%s\n" "(cons 'a '(b c))"; \
 		printf "%s\n" "(((lambda (x) (lambda (y) (cons x (cons y nil)))) 'a) 'b)"; \
@@ -124,12 +127,54 @@ test-qemu: all
 	@grep -Eq "^(0|1)$$" $(BUILD)/qemu-output.normalized.txt
 	@cat $(BUILD)/qemu-output.txt
 
+test-qemu-m5: all
+	@{ \
+		sed -n '/^(/p' lisp/assembler.lisp; \
+		sed -n '/^(/p' lisp/compiler.lisp; \
+		sed -n '/^(/p' tests/compiler_qemu.lisp; \
+		printf "\004"; \
+	} | $(QEMU) $(QEMU_FLAGS) > $(BUILD)/qemu-compiler-output.txt
+	@tr -d '\r' < $(BUILD)/qemu-compiler-output.txt > \
+		$(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "Lisp machine booted." $(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "t" $(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "42" $(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "error: address does not satisfy access alignment" \
+		$(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "error: address is not in an executable bootstrap page" \
+		$(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "error: address is outside allocated bootstrap pages" \
+		$(BUILD)/qemu-compiler-output.normalized.txt
+	@grep -Fxq "error: compiler:unknown-local" \
+		$(BUILD)/qemu-compiler-output.normalized.txt
+	@echo "Milestone 5 QEMU compiler test passed"
+
 hosted: check-host-tools $(REPL)
 
 repl: hosted
 	./$(REPL)
 
-test: check-host-tools $(VM_TESTS)
+test-compiler-hosted: hosted
+	@{ \
+		sed -n '/^(/p' lisp/assembler.lisp; \
+		sed -n '/^(/p' lisp/compiler.lisp; \
+		sed -n '/^(/p' tests/compiler_hosted.lisp; \
+	} | ./$(REPL) > $(BUILD)/hosted-compiler-output.txt 2>&1
+	@sed 's/^lisp> //' $(BUILD)/hosted-compiler-output.txt > \
+		$(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "1377555" $(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "10650931" $(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "10661923" $(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "328803" $(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "4292866287" $(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "4352" $(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "error: assembler:i-immediate-out-of-range" \
+		$(BUILD)/hosted-compiler-output.normalized.txt
+	@grep -Fxq "error: assembler:b-immediate-misaligned" \
+		$(BUILD)/hosted-compiler-output.normalized.txt
+	@echo "hosted Lisp assembler tests passed"
+
+test: check-host-tools $(VM_TESTS) test-compiler-hosted
 	./$(VM_TESTS)
 
 clean:

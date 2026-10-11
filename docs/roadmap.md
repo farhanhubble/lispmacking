@@ -92,9 +92,11 @@ pages, stores and reloads a value through bounded memory access, validates
 alignment and range failures, round-trips the allowlisted `mscratch` CSR, and
 restores interrupt state before returning safely to the REPL.
 
-## Planned milestones
+## Completed native bootstrap
 
 ### Milestone 5 — Lisp-written assembler and compiler
+
+Status: complete.
 
 Implement a small RISC-V assembler or code emitter in Lisp, followed by a
 restricted native compiler supporting integers, calls, branches, locals, and
@@ -102,6 +104,14 @@ explicit memory operations.
 
 Acceptance demonstration: compile a Lisp function to native RISC-V code,
 execute it under QEMU, and verify its result against the evaluator.
+
+The completed compiler uses Lisp-written R/I/S/B/J encoders, a documented
+one-argument RV64 ABI, fixed function slots, PC-relative branch/call patching,
+and an explicitly allocated code page. `make test-qemu` loads the Lisp sources,
+compiles four functions, executes generated calls, branches, and memory
+stores, and checks native results against the evaluator.
+
+## Planned milestones
 
 ### Milestone 6 — Microkernel boundary
 

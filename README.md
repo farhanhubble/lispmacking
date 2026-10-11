@@ -19,7 +19,7 @@ comparison of the two environments.
 
 ## Current status
 
-Milestones 0 through 4 are implemented:
+Milestones 0 through 5 are implemented:
 
 - RISC-V cross-toolchain and QEMU environment validated;
 - bare-metal RV64 startup, stack initialization, `.bss` clearing, and UART;
@@ -29,6 +29,8 @@ Milestones 0 through 4 are implemented:
 - signed 64-bit integers with checked arithmetic and comparison;
 - a bounded, explicitly privileged bootstrap interface for pages, memory,
   allowlisted CSRs, and interrupt state;
+- a Lisp-written RV64 assembler and restricted native compiler;
+- validated execution of generated Lisp functions under QEMU;
 - source-level debugging through QEMU's GDB stub.
 
 An example QEMU session:
@@ -51,14 +53,18 @@ The current language includes:
 - `quote` and `'` reader syntax;
 - `atom`, `eq`, `car`, `cdr`, and `cons`;
 - `cond`;
-- lexically scoped `lambda`, closures, and application.
+- lexically scoped `lambda`, closures, and application;
 - signed 64-bit integer literals;
-- checked `+`, `-`, `*`, `=`, `<`, `<=`, `>`, and `>=` primitives.
+- checked `+`, `-`, `*`, `=`, `<`, `<=`, `>`, and `>=` primitives;
+- reusable top-level `define`, recursive functions, and sequential `begin`;
+- integer `quotient`, `mod`, and `integer?` primitives used by the assembler.
 
 Symbols are case-sensitive. The REPL accepts one expression per line.
 Machine-mode operations are visibly separated under the `bootstrap:` prefix;
 see the [machine-oriented interface](docs/machine-interface.md) for their
 contract and safety checks.
+The [compiler reference](docs/compiler.md) documents the native source subset,
+RV64 ABI, instruction emitter, and execution boundary.
 
 ## Prerequisites
 
@@ -125,8 +131,8 @@ make test-qemu   # cross-build and execute expressions on emulated RV64
 ```
 
 The QEMU test checks ordinary evaluation, integer overflow, page allocation,
-bounded memory access, CSR allowlisting, interrupt-state restoration,
-error recovery, and controlled shutdown.
+bounded memory access, CSR allowlisting, interrupt-state restoration, and a
+separate compiler boot in which Lisp emits and executes native RV64 functions.
 
 ## Debugging
 
@@ -153,6 +159,7 @@ kernel/               bare-metal REPL entry
 platform/hosted/      standard C allocation and terminal adapter
 platform/riscv64/     QEMU UART, bump allocator, and shutdown adapter
 vm/                   portable object model, reader, evaluator, and printer
+lisp/                 Lisp-written RV64 assembler and restricted compiler
 tests/                hosted VM tests
 docs/                 architecture and design documentation
 ```
@@ -160,22 +167,24 @@ docs/                 architecture and design documentation
 ## Current limitations
 
 - Allocation is a bump arena; objects are not reclaimed until restart.
-- The bare-metal input line is limited to 511 characters.
+- The bare-metal input line is limited to 4095 characters.
 - The evaluator is recursive and uses a fixed 16 KiB stack in QEMU.
 - UART I/O is polling-based rather than interrupt-driven.
 - Bare-metal code currently runs entirely in RISC-V machine mode.
 - Bootstrap machine operations currently have machine-mode authority; there is
   no user/supervisor isolation, IPC, or capability enforcement yet.
-- There is no native Lisp compiler yet.
+- The native compiler supports only a deliberately restricted one-argument
+  integer subset and fixed-size function slots.
+- Executable bootstrap pages remain writable and generated code still runs in
+  machine mode.
 
 ## Roadmap
 
 The next planned stages are:
 
-1. a Lisp-written RISC-V assembler and restricted native compiler;
-2. page tables, privilege transitions, traps, scheduling, IPC, and
+1. page tables, privilege transitions, traps, scheduling, IPC, and
    capabilities;
-3. isolated user-space services and VirtIO drivers.
+2. isolated user-space services and VirtIO drivers.
 
 See the [project roadmap](docs/roadmap.md) for milestone definitions, current
 status, and acceptance criteria. The original experimental direction is

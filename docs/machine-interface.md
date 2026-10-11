@@ -40,10 +40,12 @@ rather than silently receiving simulated authority.
 ### Page-backed memory
 
 `(bootstrap:page-allocate)` returns the base address of a zero-filled 4096-byte
-page. Eight pages (32 KiB) are reserved at the top of QEMU RAM. Pages are
-aligned, non-overlapping, and allocated downward within that region. VM objects
-grow upward only as far as the bottom of the reserved pool, so the regions
-cannot overlap. A ninth allocation returns a recoverable exhaustion error.
+data page. `(bootstrap:code-page-allocate)` allocates from the same pool and
+also records that the page may be entered by generated code. Eight pages
+(32 KiB) are reserved at the top of QEMU RAM. Pages are aligned,
+non-overlapping, and allocated downward within that region. VM objects grow
+upward only as far as the bottom of the reserved pool, so the regions cannot
+overlap. A ninth combined allocation returns a recoverable exhaustion error.
 
 The bounded access primitives are:
 
@@ -64,6 +66,12 @@ values are non-negative and must fit the requested width. Loads are unsigned;
 a 64-bit loaded value above the Lisp signed-integer maximum is rejected as
 unrepresentable. Invalid addresses, alignment violations, and exhausted pages
 are recoverable errors.
+
+`(bootstrap:call-native entry argument)` executes only a four-byte-aligned
+entry within a page returned by `bootstrap:code-page-allocate`. It synchronizes
+the instruction cache, passes one signed integer in `a0`, and returns the
+signed `a0` result. Calls are unavailable in the hosted adapter, and ordinary
+data pages are not executable through this interface.
 
 ### CSRs and interrupt state
 

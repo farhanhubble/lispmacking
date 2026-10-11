@@ -151,6 +151,24 @@ int main(void)
     expect_eval(&vm, "(> 2 1)", "t");
     expect_eval(&vm, "(>= 1 2)", "nil");
     expect_eval(&vm, "((lambda (x) (+ x 1)) 41)", "42");
+    expect_eval(&vm, "(quotient 43 2)", "21");
+    expect_eval(&vm, "(mod 43 2)", "1");
+    expect_eval(&vm, "(integer? 42)", "t");
+    expect_eval(&vm, "(integer? 'forty-two)", "nil");
+    expect_eval(&vm, "(begin 1 2 3)", "3");
+    expect_eval(&vm, "(begin)", "nil");
+    expect_eval(&vm, "(define increment (lambda (x) (+ x 1)))",
+                "<lambda>");
+    expect_eval(&vm, "(increment 41)", "42");
+    expect_eval(&vm,
+                "(define sum-down (lambda (x) (cond ((= x 0) 0) "
+                "(t (+ x (sum-down (- x 1)))))))",
+                "<lambda>");
+    expect_eval(&vm, "(sum-down 6)", "21");
+    expect_eval(&vm,
+                "(define captured ((lambda (x) (lambda () x)) 42))",
+                "<lambda>");
+    expect_eval(&vm, "(captured)", "42");
 
     expect_error(&vm, "missing");
     expect_error(&vm, "(car 'a)");
@@ -166,7 +184,14 @@ int main(void)
     expect_error_contains(&vm, "(* 9223372036854775807 2)", "overflow");
     expect_error_contains(&vm, "(* -9223372036854775808 -1)", "overflow");
     expect_error_contains(&vm, "(+ 1 'a)", "expects two integers");
+    expect_error_contains(&vm, "(quotient 1 0)", "division by zero");
+    expect_error_contains(&vm, "((lambda () (define nested 1)))",
+                          "only valid at top level");
+    expect_error_contains(&vm, "(error 'intentional-error)",
+                          "intentional-error");
     expect_error_contains(&vm, "(bootstrap:page-allocate)", "unavailable");
+    expect_error_contains(&vm, "(bootstrap:code-page-allocate)",
+                          "unavailable");
     expect_error_contains(&vm, "(bootstrap:load-u8 0)", "unavailable");
     expect_error_contains(&vm, "(bootstrap:store-u8 'address 1)",
                           "expects integer address and value");
@@ -176,6 +201,8 @@ int main(void)
                           "unavailable");
     expect_error_contains(&vm, "(bootstrap:interrupts-restore 2)",
                           "must be 0 or 1");
+    expect_error_contains(&vm, "(bootstrap:call-native 0 1)",
+                          "unavailable");
 
     vm_destroy(&vm);
     if (failures != 0) {

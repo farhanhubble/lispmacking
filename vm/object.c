@@ -197,7 +197,10 @@ bool vm_init(Vm *vm, VmPlatform platform)
     vm->quote_symbol = NULL;
     vm->cond_symbol = NULL;
     vm->lambda_symbol = NULL;
+    vm->define_symbol = NULL;
+    vm->begin_symbol = NULL;
     vm->global_environment = NULL;
+    vm->evaluation_depth = 0;
     vm_clear_error(vm);
 
     if (platform.allocate == NULL || platform.deallocate == NULL) {
@@ -214,8 +217,11 @@ bool vm_init(Vm *vm, VmPlatform platform)
     vm->quote_symbol = vm_intern(vm, "quote");
     vm->cond_symbol = vm_intern(vm, "cond");
     vm->lambda_symbol = vm_intern(vm, "lambda");
+    vm->define_symbol = vm_intern(vm, "define");
+    vm->begin_symbol = vm_intern(vm, "begin");
     if (vm->true_value == NULL || vm->quote_symbol == NULL ||
-        vm->cond_symbol == NULL || vm->lambda_symbol == NULL) {
+        vm->cond_symbol == NULL || vm->lambda_symbol == NULL ||
+        vm->define_symbol == NULL || vm->begin_symbol == NULL) {
         return false;
     }
 
