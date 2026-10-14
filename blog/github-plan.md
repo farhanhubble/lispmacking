@@ -17,7 +17,7 @@ subject is complete.
 - [ ] Add CI coverage that rebuilds assets and rejects stale output.
 - [ ] Document PNG export sizes for Medium and social cards.
 
-### Article 1 — The Machine That Could Only Say One Sentence
+### Article 1 — It from Bit
 
 - [x] Produce a substantial first draft.
 - [x] Add the boot-path diagram.
@@ -80,4 +80,3 @@ subject is complete.
 - [ ] Capture the real VirtIO-backed operation.
 - [ ] Compare the trusted core before and after moving device policy out.
 - [ ] Draft, review and publish from implemented evidence.
-

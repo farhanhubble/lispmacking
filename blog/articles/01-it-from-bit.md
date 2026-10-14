@@ -1,12 +1,12 @@
 <!--
-title: The Machine That Could Only Say One Sentence
+title: It from Bit
 subtitle: Building a Lisp machine by first teaching a RISC-V CPU to say hello
 status: substantial draft
 hero: ../assets/artwork/lispmacking-series-hero.png
 reading_time: 5 minutes
 -->
 
-# The Machine That Could Only Say One Sentence
+# It from Bit
 
 At the beginning, our Lisp machine did not know any Lisp.
 

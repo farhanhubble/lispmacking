@@ -8,7 +8,7 @@ exists and what is planned.
 
 | # | Working title | Technical reveal | Status | Primary evidence |
 |---|---|---|---|---|
-| 1 | The Machine That Could Only Say One Sentence | Bare-metal startup is a chain of mundane obligations before it is a “machine” | Draft | Boot-path diagram; QEMU boot capture |
+| 1 | It from Bit | Bare-metal startup is a chain of mundane obligations before it is a “machine” | Draft | Boot-path diagram; QEMU boot capture |
 | 2 | One Lisp, Two Universes | The same evaluator can live inside an OS process and on a machine with no OS | Draft | Hosted/bare-metal diagram; paired terminal captures |
 | 3 | The Privilege of Knowing an Address | Integer and memory primitives become dangerous at the boundary, not in arithmetic itself | Planned | Bootstrap boundary diagram; rejection cases |
 | 4 | The Day Lisp Wrote a RISC-V Instruction | Lisp interpreted by C can emit a native function that later runs on the CPU | Draft | Compiler pipeline; native QEMU proof |
@@ -37,4 +37,3 @@ An article is ready when:
 - the final read is below ten minutes unless the material genuinely requires a
   two-part article;
 - links and image alt text work outside Medium.
-
