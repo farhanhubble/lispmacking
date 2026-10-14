@@ -6,9 +6,11 @@ publisher, but every article is ordinary Markdown and every diagram is an SVG,
 so the same material can be published on a personal site, Substack, DEV, or in
 the repository itself.
 
-The series follows one rule: each article tells one technical story. It begins
-with a concrete problem, performs a small experiment, reaches one surprising
-result, and stops before the next problem becomes a second article.
+The series begins with [Bare Metal Enlightenment](articles/00-bare-metal-enlightenment.md),
+the question about SectorLISP that connected bare-metal programming and Lisp
+and started the project. Every article after it tells one technical story: a
+concrete problem, a small experiment, one surprising result, and a stopping
+point before the next problem becomes a second article.
 
 ## Contents
 

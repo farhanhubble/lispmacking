@@ -8,6 +8,14 @@ subject is complete.
 
 ## Proposed issues
 
+### Prologue — Bare Metal Enlightenment
+
+- [x] Record the originating ChatGPT question and the missing connection.
+- [x] Explain SectorLISP as a bootstrap demonstration rather than a byte-count curiosity.
+- [x] Connect the insight to the implemented Lispmacking stack and planned microkernel boundary.
+- [ ] Verify the SectorLISP technical claims against its primary sources.
+- [ ] Perform the final personal voice edit and publish.
+
 ### Establish the reproducible blog asset pipeline
 
 - [x] Add platform-neutral Markdown structure.

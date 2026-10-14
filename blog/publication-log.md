@@ -5,6 +5,7 @@ here to prevent diverging edits and accidental duplicate canonical URLs.
 
 | Article | Canonical URL | Other publications | Published | Source commit |
 |---|---|---|---|---|
+| Bare Metal Enlightenment | — | — | — | — |
 | It from Bit | — | — | — | — |
 | One Lisp, Two Universes | — | — | — | — |
 | The Privilege of Knowing an Address | — | — | — | — |

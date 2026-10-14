@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800" role="img" aria-labelledby="title desc">
+<title id="title">Bare metal, Lisp, and SectorLISP meet at the evaluator</title>
+<desc id="desc">Technical diagram for the Lispmacking article series.</desc>
+<rect width="100%" height="100%" fill="#111719"/>
+<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".28"/></filter></defs>
+<text x="700" y="72" fill="#e6a14a" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" text-anchor="middle">THE CONNECTION I HAD MISSED</text>
+<rect x="80" y="145" width="380" height="155" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="270" y="205" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">Bare metal</text>
+<text x="270" y="254" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" text-anchor="middle">reset · memory · devices</text>
+<rect x="510" y="145" width="380" height="155" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="700" y="205" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">Lisp</text>
+<text x="700" y="254" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" text-anchor="middle">symbols · lists · evaluation</text>
+<rect x="940" y="145" width="380" height="155" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="1130" y="205" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">SectorLISP</text>
+<text x="1130" y="254" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" text-anchor="middle">a bootable computational seed</text>
+<line x1="270" y1="300" x2="700" y2="430" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<line x1="700" y1="300" x2="700" y2="430" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<line x1="1130" y1="300" x2="700" y2="430" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<rect x="430" y="430" width="540" height="155" rx="18" fill="#1b2426" stroke="#e6a14a" stroke-width="3" filter="url(#shadow)"/>
+<text x="700" y="495" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="750" text-anchor="middle">The evaluator</text>
+<text x="700" y="545" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="21" font-weight="500" text-anchor="middle">machine instructions acquire symbolic meaning</text>
+<line x1="700" y1="605" x2="700" y2="674" stroke="#54b9b1" stroke-width="5" stroke-linecap="round"/>
+<path d="M 687 674 L 700 690 L 713 674" fill="none" stroke="#54b9b1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="700" y="738" fill="#54b9b1" font-family="Inter, system-ui, sans-serif" font-size="29" font-weight="750" text-anchor="middle">LISPMACKING</text>
+<text x="700" y="775" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="21" font-weight="500" text-anchor="middle">grow the machine around the language</text>
+</svg>

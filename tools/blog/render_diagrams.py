@@ -134,7 +134,44 @@ def compiler_pipeline() -> None:
     save("compiler-pipeline.svg", svg)
 
 
+def bare_metal_enlightenment() -> None:
+    svg = begin("Bare metal, Lisp, and SectorLISP meet at the evaluator")
+    svg += [text(700, 72, "THE CONNECTION I HAD MISSED", 22, AMBER, weight=700)]
+
+    sources = [
+        ("Bare metal", "reset · memory · devices", 80),
+        ("Lisp", "symbols · lists · evaluation", 510),
+        ("SectorLISP", "a bootable computational seed", 940),
+    ]
+    for heading, detail, x in sources:
+        svg.append(box(x, 145, 380, 155, TEAL))
+        svg.append(text(x + 190, 205, heading, 31, CREAM, weight=700))
+        svg.append(mono(x + 190, 254, detail, 19, MUTED))
+
+    for x in (270, 700, 1130):
+        svg.append(
+            f'<line x1="{x}" y1="{300}" x2="{700}" y2="{430}" '
+            f'stroke="{AMBER}" stroke-width="5" stroke-linecap="round"/>'
+        )
+
+    svg += [
+        box(430, 430, 540, 155, AMBER),
+        text(700, 495, "The evaluator", 36, CREAM, weight=750),
+        text(700, 545, "machine instructions acquire symbolic meaning", 21, MUTED),
+    ]
+    svg += [
+        f'<line x1="700" y1="605" x2="700" y2="674" stroke="{TEAL}" stroke-width="5" stroke-linecap="round"/>',
+        f'<path d="M 687 674 L 700 690 L 713 674" fill="none" stroke="{TEAL}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
+    ]
+    svg += [
+        text(700, 738, "LISPMACKING", 29, TEAL, weight=750),
+        text(700, 775, "grow the machine around the language", 21, MUTED),
+    ]
+    save("bare-metal-enlightenment.svg", svg)
+
+
 def main() -> None:
+    bare_metal_enlightenment()
     boot_path()
     two_environments()
     compiler_pipeline()
