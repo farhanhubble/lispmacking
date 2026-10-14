@@ -30,7 +30,8 @@ HOST_FLAGS := -std=c11 -I. -Wall -Wextra -Werror -pedantic -O2 -g
 HOST_LDFLAGS ?=
 
 .PHONY: all check-tools check-host-tools run debug test-qemu test-qemu-m4 \
-	test-qemu-m5 hosted repl test test-compiler-hosted clean
+	test-qemu-m5 hosted repl test test-compiler-hosted blog-diagrams \
+	blog-terminal-assets blog-assets clean
 
 all: check-tools $(ELF)
 
@@ -176,6 +177,22 @@ test-compiler-hosted: hosted
 
 test: check-host-tools $(VM_TESTS) test-compiler-hosted
 	./$(VM_TESTS)
+
+blog-diagrams:
+	python3 tools/blog/render_diagrams.py
+
+blog-terminal-assets:
+	python3 tools/blog/capture_terminal.py \
+		--title "Hosted evaluator and assembler tests" \
+		--output blog/assets/terminal/hosted-tests -- make test
+	$(MAKE) test-qemu-m5
+	python3 tools/blog/capture_terminal.py \
+		--title "Native compiler on QEMU RV64" \
+		--output blog/assets/terminal/qemu-tests \
+		--from-file build/qemu-compiler-output.normalized.txt \
+		--start-pattern '^lisp> \(define code-page' --max-lines 30
+
+blog-assets: blog-diagrams blog-terminal-assets
 
 clean:
 	rm -rf $(BUILD)

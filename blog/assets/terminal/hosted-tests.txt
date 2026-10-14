@@ -1,0 +1,3 @@
+hosted Lisp assembler tests passed
+./build/vm-tests
+all VM tests passed

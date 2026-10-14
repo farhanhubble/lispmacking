@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800" role="img" aria-labelledby="title desc">
+<title id="title">Lisp to native RV64 compiler pipeline</title>
+<desc id="desc">Technical diagram for the Lispmacking article series.</desc>
+<rect width="100%" height="100%" fill="#111719"/>
+<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".28"/></filter></defs>
+<text x="90" y="82" fill="#e6a14a" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" text-anchor="start">THE FIRST NATIVE BOOTSTRAP</text>
+<rect x="70" y="230" width="205" height="210" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="172" y="300" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">Function spec</text>
+<text x="172" y="356" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" text-anchor="middle">'((twice (x) (+ x x)))</text>
+<line x1="285" y1="335" x2="312" y2="335" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 312 322 L 325 335 L 312 348" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="335" y="230" width="205" height="210" rx="18" fill="#1b2426" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="437" y="300" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">Lisp compiler</text>
+<text x="437" y="356" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" text-anchor="middle">walk + select + patch</text>
+<line x1="550" y1="335" x2="577" y2="335" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 577 322 L 590 335 L 577 348" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="600" y="230" width="205" height="210" rx="18" fill="#1b2426" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="702" y="300" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">Lisp assembler</text>
+<text x="702" y="356" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" text-anchor="middle">R / I / S / B / J</text>
+<line x1="815" y1="335" x2="842" y2="335" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 842 322 L 855 335 L 842 348" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="865" y="230" width="205" height="210" rx="18" fill="#1b2426" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="967" y="300" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">Code page</text>
+<text x="967" y="356" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" text-anchor="middle">checked 32-bit writes</text>
+<line x1="1080" y1="335" x2="1107" y2="335" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 1107 322 L 1120 335 L 1107 348" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1130" y="230" width="205" height="210" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="1232" y="300" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">RV64 CPU</text>
+<text x="1232" y="356" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" text-anchor="middle">fence.i + native call</text>
+<rect x="285" y="555" width="830" height="120" rx="14" fill="#151d1f" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="700" y="605" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">C evaluator remains underneath</text>
+<text x="700" y="645" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">It interprets the Lisp compiler; generated functions later run natively</text>
+</svg>

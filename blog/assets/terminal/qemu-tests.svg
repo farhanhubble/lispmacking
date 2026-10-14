@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1332" height="960" viewBox="0 0 1332 960" role="img" aria-labelledby="title desc">
+<title id="title">Native compiler on QEMU RV64</title>
+<desc id="desc">Terminal output rendered from a real project command.</desc>
+<rect width="100%" height="100%" rx="18" fill="#111719"/>
+<circle cx="34" cy="34" r="7" fill="#d76c62"/><circle cx="58" cy="34" r="7" fill="#e6a14a"/><circle cx="82" cy="34" r="7" fill="#54b9b1"/>
+<text x="666.0" y="43" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="18" text-anchor="middle">Native compiler on QEMU RV64</text>
+<line x1="20" y1="64" x2="1312" y2="64" stroke="#314044" stroke-width="2"/>
+<text x="36" y="98" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (define code-page (bootstrap:code-page-allocate))</text>
+<text x="36" y="125" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">2281697280</text>
+<text x="36" y="152" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (compiler-compile-program code-page &#x27;((twice-native (x) (+ x x)) (positive-native (x) (cond ((&lt; x 0) 0) (t</text>
+<text x="36" y="179" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">↳   (twice-native x)))) (store-native (x) (store-u64 x (twice-native 21))) (load-native (x) (load-u64 x))))</text>
+<text x="36" y="206" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">2281697280</text>
+<text x="36" y="233" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (= (bootstrap:call-native code-page 21) (twice 21))</text>
+<text x="36" y="260" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">t</text>
+<text x="36" y="287" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (= (bootstrap:call-native (+ code-page 256) 21) (positive-twice 21))</text>
+<text x="36" y="314" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">t</text>
+<text x="36" y="341" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (= (bootstrap:call-native (+ code-page 256) -1) (positive-twice -1))</text>
+<text x="36" y="368" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">t</text>
+<text x="36" y="395" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (define data-page (bootstrap:page-allocate))</text>
+<text x="36" y="422" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">2281693184</text>
+<text x="36" y="449" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (bootstrap:call-native (+ code-page 512) data-page)</text>
+<text x="36" y="476" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">42</text>
+<text x="36" y="503" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">⋯ output omitted; see the adjacent transcript ⋯</text>
+<text x="36" y="530" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">t</text>
+<text x="36" y="557" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (bootstrap:call-native (+ code-page 2) 1)</text>
+<text x="36" y="584" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">error: address does not satisfy access alignment</text>
+<text x="36" y="611" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (bootstrap:call-native data-page 1)</text>
+<text x="36" y="638" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">error: address is not in an executable bootstrap page</text>
+<text x="36" y="665" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (bootstrap:call-native 0 1)</text>
+<text x="36" y="692" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">error: address is outside allocated bootstrap pages</text>
+<text x="36" y="719" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (define rejected-page (bootstrap:page-allocate))</text>
+<text x="36" y="746" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">2281689088</text>
+<text x="36" y="773" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (compiler-compile-program rejected-page &#x27;((bad (x) missing)))</text>
+<text x="36" y="800" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">error: compiler:unknown-local</text>
+<text x="36" y="827" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt; (positive-twice 21)</text>
+<text x="36" y="854" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">42</text>
+<text x="36" y="881" fill="#f3ead8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" xml:space="preserve">lisp&gt;</text>
+</svg>

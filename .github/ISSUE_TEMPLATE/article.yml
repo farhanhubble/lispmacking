@@ -1,0 +1,83 @@
+name: Article
+description: Plan, draft, review, and publish one Lispmacking development story
+title: "Article — "
+labels:
+  - writing
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use one issue per article. Keep technical implementation work in its own milestone; this form tracks the story and its evidence.
+
+  - type: input
+    id: working-title
+    attributes:
+      label: Working title
+      placeholder: The Machine That Could Only Say One Sentence
+    validations:
+      required: true
+
+  - type: textarea
+    id: reveal
+    attributes:
+      label: Principal technical reveal
+      description: State the one thing a reader should understand or witness by the end.
+    validations:
+      required: true
+
+  - type: textarea
+    id: story
+    attributes:
+      label: Story spine
+      description: Cold open, constraint, experiment, reveal, honest boundary, and next door.
+      placeholder: |
+        - Cold open:
+        - Constraint:
+        - Experiment:
+        - Reveal:
+        - Honest boundary:
+        - Next door:
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Commands, source references, diagrams, and terminal captures needed to support the article.
+      placeholder: |
+        - [ ] Reproducible command and transcript
+        - [ ] Technical diagram
+        - [ ] Source links checked against current main
+    validations:
+      required: true
+
+  - type: textarea
+    id: publication
+    attributes:
+      label: Publication checklist
+      value: |
+        - [ ] Draft is 900–1,400 words unless the story genuinely needs more
+        - [ ] Every technical claim is checked against the current repository
+        - [ ] Every terminal image has a matching plain-text transcript
+        - [ ] Implemented and planned behaviour are visibly distinguished
+        - [ ] Hero image, diagrams, captions, and alt text are ready
+        - [ ] Voice edit is complete
+        - [ ] Platform-specific metadata and canonical URL are set
+        - [ ] Published URL is added to this issue and `blog/publication-log.md`
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Initial stage
+      options:
+        - Idea
+        - Evidence gathering
+        - Outline
+        - Draft
+        - Technical review
+        - Voice edit
+        - Ready to publish
+    validations:
+      required: true
+

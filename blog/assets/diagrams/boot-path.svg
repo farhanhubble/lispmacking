@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800" role="img" aria-labelledby="title desc">
+<title id="title">Bare-metal RISC-V boot path</title>
+<desc id="desc">Technical diagram for the Lispmacking article series.</desc>
+<rect width="100%" height="100%" fill="#111719"/>
+<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".28"/></filter></defs>
+<text x="90" y="85" fill="#e6a14a" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" text-anchor="start">FROM RESET TO A SENTENCE</text>
+<rect x="90" y="280" width="190" height="200" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="185" y="350" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">QEMU reset</text>
+<text x="185" y="403" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">CPU starts at _start</text>
+<line x1="290" y1="380" x2="327" y2="380" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 327 367 L 340 380 L 327 393" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="350" y="280" width="190" height="200" rx="18" fill="#1b2426" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="445" y="350" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">Assembly</text>
+<text x="445" y="403" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">stack + zero .bss</text>
+<line x1="550" y1="380" x2="587" y2="380" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 587 367 L 600 380 L 587 393" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="610" y="280" width="190" height="200" rx="18" fill="#1b2426" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="705" y="350" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">kernel_main</text>
+<text x="705" y="403" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">arena + VM setup</text>
+<line x1="810" y1="380" x2="847" y2="380" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 847 367 L 860 380 L 847 393" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="870" y="280" width="190" height="200" rx="18" fill="#1b2426" stroke="#314044" stroke-width="3" filter="url(#shadow)"/>
+<text x="965" y="350" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">UART</text>
+<text x="965" y="403" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">one byte at a time</text>
+<line x1="1070" y1="380" x2="1107" y2="380" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
+<path d="M 1107 367 L 1120 380 L 1107 393" fill="none" stroke="#e6a14a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1130" y="280" width="190" height="200" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="1225" y="350" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="27" font-weight="650" text-anchor="middle">Serial console</text>
+<text x="1225" y="403" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">Lisp machine booted.</text>
+<text x="700" y="625" fill="#54b9b1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" text-anchor="middle">0x80000000</text>
+<text x="700" y="670" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="500" text-anchor="middle">QEMU virt RAM base — fixed by the linker map</text>
+</svg>

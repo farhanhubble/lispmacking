@@ -162,7 +162,17 @@ vm/                   portable object model, reader, evaluator, and printer
 lisp/                 Lisp-written RV64 assembler and restricted compiler
 tests/                hosted VM tests
 docs/                 architecture and design documentation
+blog/                 platform-neutral article drafts and visual assets
+tools/blog/           reproducible diagram and terminal-capture tools
 ```
+
+## Development stories
+
+The [Lispmacking field notes](blog/README.md) tell the development story from
+the first UART byte through native Lisp-generated RV64 code and the planned
+microkernel boundary. The article sources are publication-neutral Markdown;
+diagrams are editable SVGs, and terminal images are rebuilt from real test
+transcripts with `make blog-assets`.
 
 ## Current limitations
 

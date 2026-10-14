@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800" role="img" aria-labelledby="title desc">
+<title id="title">One portable Lisp evaluator in two environments</title>
+<desc id="desc">Technical diagram for the Lispmacking article series.</desc>
+<rect width="100%" height="100%" fill="#111719"/>
+<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".28"/></filter></defs>
+<text x="700" y="78" fill="#e6a14a" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" text-anchor="middle">ONE EVALUATOR, TWO EXECUTION ENVIRONMENTS</text>
+<rect x="380" y="135" width="640" height="150" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
+<text x="700" y="195" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="34" font-weight="700" text-anchor="middle">Portable Lisp VM</text>
+<text x="700" y="242" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22" text-anchor="middle">objects · reader · evaluator · printer</text>
+<line x1="570" y1="305" x2="337" y2="405" stroke="#54b9b1" stroke-width="5" stroke-linecap="round"/>
+<path d="M 337 392 L 350 405 L 337 418" fill="none" stroke="#54b9b1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="830" y1="305" x2="1037" y2="405" stroke="#54b9b1" stroke-width="5" stroke-linecap="round"/>
+<path d="M 1037 392 L 1050 405 L 1037 418" fill="none" stroke="#54b9b1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="90" y="405" width="520" height="250" rx="18" fill="#1b2426" stroke="#e6a14a" stroke-width="3" filter="url(#shadow)"/>
+<text x="350" y="470" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">Hosted adapter</text>
+<text x="350" y="520" fill="#e6a14a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="25" text-anchor="middle">malloc + stdio</text>
+<text x="350" y="570" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="23" font-weight="500" text-anchor="middle">Normal OS process</text>
+<text x="350" y="610" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">Fast tests · sanitizers · debugger</text>
+<rect x="790" y="405" width="520" height="250" rx="18" fill="#1b2426" stroke="#e6a14a" stroke-width="3" filter="url(#shadow)"/>
+<text x="1050" y="470" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">RISC-V adapter</text>
+<text x="1050" y="520" fill="#e6a14a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="25" text-anchor="middle">arena + UART</text>
+<text x="1050" y="570" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="23" font-weight="500" text-anchor="middle">Bare-metal QEMU virt machine</text>
+<text x="1050" y="610" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="500" text-anchor="middle">No OS · no C library</text>
+<text x="700" y="740" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="23" font-weight="500" text-anchor="middle">Shared semantics; different binaries and machine obligations</text>
+</svg>
