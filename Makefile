@@ -192,7 +192,15 @@ blog-terminal-assets:
 		--from-file build/qemu-compiler-output.normalized.txt \
 		--start-pattern '^lisp> \(define code-page' --max-lines 30
 
-blog-assets: blog-diagrams blog-terminal-assets
+blog-assets: blog-diagrams blog-terminal-assets blog-prologue-assets
 
 clean:
 	rm -rf $(BUILD)
+
+# Publication figures do not require the cross-toolchain or QEMU.
+.PHONY: blog-prologue-assets blog-check-diagrams
+blog-prologue-assets:
+	uv run --with cairosvg==2.8.2 python tools/blog/export_diagrams.py --format both
+
+blog-check-diagrams:
+	python3 tools/blog/export_diagrams.py --check

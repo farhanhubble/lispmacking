@@ -1,26 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800" role="img" aria-labelledby="title desc">
-<title id="title">Bare metal, Lisp, and SectorLISP meet at the evaluator</title>
-<desc id="desc">Technical diagram for the Lispmacking article series.</desc>
-<rect width="100%" height="100%" fill="#111719"/>
-<defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".28"/></filter></defs>
-<text x="700" y="72" fill="#e6a14a" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" text-anchor="middle">THE CONNECTION I HAD MISSED</text>
-<rect x="80" y="145" width="380" height="155" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
-<text x="270" y="205" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">Bare metal</text>
-<text x="270" y="254" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" text-anchor="middle">reset · memory · devices</text>
-<rect x="510" y="145" width="380" height="155" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
-<text x="700" y="205" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">Lisp</text>
-<text x="700" y="254" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" text-anchor="middle">symbols · lists · evaluation</text>
-<rect x="940" y="145" width="380" height="155" rx="18" fill="#1b2426" stroke="#54b9b1" stroke-width="3" filter="url(#shadow)"/>
-<text x="1130" y="205" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="31" font-weight="700" text-anchor="middle">SectorLISP</text>
-<text x="1130" y="254" fill="#aeb9b6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" text-anchor="middle">a bootable computational seed</text>
-<line x1="270" y1="300" x2="700" y2="430" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
-<line x1="700" y1="300" x2="700" y2="430" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
-<line x1="1130" y1="300" x2="700" y2="430" stroke="#e6a14a" stroke-width="5" stroke-linecap="round"/>
-<rect x="430" y="430" width="540" height="155" rx="18" fill="#1b2426" stroke="#e6a14a" stroke-width="3" filter="url(#shadow)"/>
-<text x="700" y="495" fill="#f3ead8" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="750" text-anchor="middle">The evaluator</text>
-<text x="700" y="545" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="21" font-weight="500" text-anchor="middle">machine instructions acquire symbolic meaning</text>
-<line x1="700" y1="605" x2="700" y2="674" stroke="#54b9b1" stroke-width="5" stroke-linecap="round"/>
-<path d="M 687 674 L 700 690 L 713 674" fill="none" stroke="#54b9b1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="700" y="738" fill="#54b9b1" font-family="Inter, system-ui, sans-serif" font-size="29" font-weight="750" text-anchor="middle">LISPMACKING</text>
-<text x="700" y="775" fill="#aeb9b6" font-family="Inter, system-ui, sans-serif" font-size="21" font-weight="500" text-anchor="middle">grow the machine around the language</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="780" viewBox="0 0 800 780" role="img" aria-labelledby="title desc">
+<title id="title">Inside the Lisp machine</title>
+<desc id="desc">QEMU emulates an RV64 CPU, RAM and UART. Inside the guest, Lisp compiler and assembler programs are interpreted by the C evaluator above the bare-metal platform adapter. The tools emit instructions into a RAM code page; bootstrap:call-native enters that code on the emulated CPU. All guest code currently runs in machine mode, without a guest OS.</desc>
+<rect x="0" y="0" width="800" height="780" rx="0" style="fill:#fffdf7;stroke:none;stroke-width:2"/>
+<text x="36" y="43" font-family="Noto Sans, sans-serif" font-size="25" font-weight="700" fill="#202e3e" text-anchor="start">Inside the Lisp machine</text>
+<rect x="36" y="75" width="728" height="637" rx="18" style="fill:#f2f5f8;stroke:#64748b;stroke-width:2"/>
+<text x="58" y="110" font-family="Noto Sans, sans-serif" font-size="25" font-weight="700" fill="#334155" text-anchor="start">QEMU</text>
+<text x="151" y="109" font-family="Noto Sans, sans-serif" font-size="18" font-weight="400" fill="#526174" text-anchor="start">virt · emulated RISC-V machine</text>
+<text x="58" y="153" font-family="Noto Sans, sans-serif" font-size="13" font-weight="700" fill="#526174" text-anchor="start">OUR BARE-METAL SOFTWARE</text>
+<text x="58" y="176" font-family="Noto Sans, sans-serif" font-size="15" font-weight="400" fill="#526174" text-anchor="start">All execution in machine mode</text>
+<rect x="66" y="210" width="420" height="76" rx="6" style="fill:#f0e8ff;stroke:#6d3bb0;stroke-width:2"/>
+<rect x="66" y="210" width="6" height="76" rx="0" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<text x="86" y="240" font-family="Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#6d3bb0" text-anchor="start">Lisp compiler + assembler</text>
+<text x="86" y="265" font-family="Noto Sans, sans-serif" font-size="15" font-weight="400" fill="#6d3bb0" text-anchor="start">lisp/compiler.lisp  ·  lisp/assembler.lisp</text>
+<text x="82" y="313" font-family="Noto Sans, sans-serif" font-size="14" font-weight="400" fill="#2459a6" text-anchor="start">interpreted by</text>
+<line x1="450" y1="292" x2="450.0" y2="312.0" style="stroke:#2459a6;stroke-width:3;stroke-linecap:round"/>
+<polygon points="450.00,324.00 445.00,312.00 455.00,312.00" fill="#2459a6"/>
+<rect x="66" y="332" width="420" height="76" rx="6" style="fill:#e8f0ff;stroke:#2459a6;stroke-width:2"/>
+<rect x="66" y="332" width="6" height="76" rx="0" style="fill:#2459a6;stroke:none;stroke-width:2"/>
+<text x="86" y="362" font-family="Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#2459a6" text-anchor="start">Portable C evaluator</text>
+<text x="86" y="387" font-family="Noto Sans, sans-serif" font-size="15" font-weight="400" fill="#2459a6" text-anchor="start">objects  ·  reader  ·  evaluator  ·  printer</text>
+<line x1="276" y1="416" x2="276.0" y2="428.0" style="stroke:#146b60;stroke-width:3;stroke-linecap:round"/>
+<polygon points="276.00,440.00 271.00,428.00 281.00,428.00" fill="#146b60"/>
+<rect x="66" y="448" width="420" height="76" rx="6" style="fill:#ddf3eb;stroke:#146b60;stroke-width:2"/>
+<rect x="66" y="448" width="6" height="76" rx="0" style="fill:#146b60;stroke:none;stroke-width:2"/>
+<text x="86" y="478" font-family="Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#146b60" text-anchor="start">Bare-metal platform adapter</text>
+<text x="86" y="503" font-family="Noto Sans, sans-serif" font-size="15" font-weight="400" fill="#146b60" text-anchor="start">arena allocator  ·  UART I/O  ·  machine operations</text>
+<text x="82" y="548" font-family="Noto Sans, sans-serif" font-size="15" font-weight="400" fill="#526174" text-anchor="start">boot/start.S / kernel_main</text>
+<rect x="558" y="292" width="180" height="154" rx="7" style="fill:#f0e8ff;stroke:#6d3bb0;stroke-width:2"/>
+<text x="575" y="320" font-family="Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#6d3bb0" text-anchor="start">Code page</text>
+<text x="575" y="343" font-family="Noto Sans, sans-serif" font-size="15" font-weight="400" fill="#6d3bb0" text-anchor="start">in guest RAM</text>
+<rect x="576" y="363" width="17" height="12" rx="2" style="fill:#b59bd9;stroke:none;stroke-width:2"/>
+<rect x="600" y="363" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="624" y="363" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="648" y="363" width="17" height="12" rx="2" style="fill:#b59bd9;stroke:none;stroke-width:2"/>
+<rect x="672" y="363" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="696" y="363" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="576" y="383" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="600" y="383" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="624" y="383" width="17" height="12" rx="2" style="fill:#b59bd9;stroke:none;stroke-width:2"/>
+<rect x="648" y="383" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="672" y="383" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="696" y="383" width="17" height="12" rx="2" style="fill:#b59bd9;stroke:none;stroke-width:2"/>
+<rect x="576" y="403" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="600" y="403" width="17" height="12" rx="2" style="fill:#b59bd9;stroke:none;stroke-width:2"/>
+<rect x="624" y="403" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="648" y="403" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<rect x="672" y="403" width="17" height="12" rx="2" style="fill:#b59bd9;stroke:none;stroke-width:2"/>
+<rect x="696" y="403" width="17" height="12" rx="2" style="fill:#6d3bb0;stroke:none;stroke-width:2"/>
+<line x1="486" y1="248" x2="648" y2="248" style="stroke:#6d3bb0;stroke-width:3;stroke-linecap:round"/>
+<line x1="648" y1="248" x2="648.0" y2="272.0" style="stroke:#6d3bb0;stroke-width:3;stroke-linecap:round"/>
+<polygon points="648.00,284.00 643.00,272.00 653.00,272.00" fill="#6d3bb0"/>
+<text x="530" y="233" font-family="Noto Sans, sans-serif" font-size="16" font-weight="400" fill="#6d3bb0" text-anchor="start">emit RV64</text>
+<rect x="58" y="584" width="684" height="108" rx="10" style="fill:#fff4d9;stroke:#995600;stroke-width:2"/>
+<text x="76" y="608" font-family="Noto Sans, sans-serif" font-size="12" font-weight="700" fill="#995600" text-anchor="start">EMULATED HARDWARE</text>
+<line x1="268" y1="621" x2="268" y2="676" style="stroke:#dbc799;stroke-width:1;stroke-linecap:round"/>
+<line x1="504" y1="621" x2="504" y2="676" style="stroke:#dbc799;stroke-width:1;stroke-linecap:round"/>
+<rect x="79" y="632" width="42" height="30" rx="3" style="fill:#fff0ce;stroke:#995600;stroke-width:2"/>
+<text x="85" y="653" font-family="Noto Sans, sans-serif" font-size="17" font-weight="700" fill="#995600" text-anchor="start">&gt;_</text>
+<text x="139" y="651" font-family="Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#995600" text-anchor="start">UART</text>
+<rect x="294" y="632" width="48" height="28" rx="3" style="fill:#fff0ce;stroke:#995600;stroke-width:2"/>
+<rect x="300" y="638" width="9" height="15" rx="1" style="fill:#995600;stroke:none;stroke-width:2"/>
+<rect x="313" y="638" width="9" height="15" rx="1" style="fill:#995600;stroke:none;stroke-width:2"/>
+<rect x="326" y="638" width="9" height="15" rx="1" style="fill:#995600;stroke:none;stroke-width:2"/>
+<text x="359" y="651" font-family="Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#995600" text-anchor="start">RAM</text>
+<rect x="530" y="628" width="40" height="40" rx="4" style="fill:#fff0ce;stroke:#995600;stroke-width:2"/>
+<rect x="539" y="637" width="22" height="22" rx="2" style="fill:#995600;stroke:none;stroke-width:2"/>
+<line x1="525" y1="637" x2="530" y2="637" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="570" y1="637" x2="575" y2="637" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="539" y1="623" x2="539" y2="628" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="539" y1="668" x2="539" y2="673" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="525" y1="647" x2="530" y2="647" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="570" y1="647" x2="575" y2="647" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="549" y1="623" x2="549" y2="628" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="549" y1="668" x2="549" y2="673" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="525" y1="657" x2="530" y2="657" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="570" y1="657" x2="575" y2="657" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="559" y1="623" x2="559" y2="628" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<line x1="559" y1="668" x2="559" y2="673" style="stroke:#995600;stroke-width:2;stroke-linecap:round"/>
+<text x="588" y="653" font-family="Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#995600" text-anchor="start">RV64 CPU</text>
+<line x1="276" y1="555" x2="276.0" y2="564.0" style="stroke:#146b60;stroke-width:3;stroke-linecap:round"/>
+<polygon points="276.00,576.00 271.00,564.00 281.00,564.00" fill="#146b60"/>
+<line x1="718" y1="454" x2="718.0" y2="564.0" style="stroke:#995600;stroke-width:3;stroke-linecap:round"/>
+<polygon points="718.00,576.00 713.00,564.00 723.00,564.00" fill="#995600"/>
+<text x="544" y="481" font-family="Noto Sans, sans-serif" font-size="16" font-weight="400" fill="#995600" text-anchor="start">native call</text>
+<text x="544" y="505" font-family="Noto Sans, sans-serif" font-size="14" font-weight="400" fill="#995600" text-anchor="start">executes on CPU</text>
+<text x="36" y="744" font-family="Noto Sans, sans-serif" font-size="18" font-weight="400" fill="#526174" text-anchor="start">QEMU runs on the host. No guest OS sits beneath our code.</text>
 </svg>

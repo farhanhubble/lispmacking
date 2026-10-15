@@ -81,25 +81,11 @@ peculiar pleasure of treating programs as ordinary data.
 
 SectorLISP joined the drawers.
 
-![Bare metal, Lisp and SectorLISP meet at the evaluator](../assets/diagrams/bare-metal-enlightenment.svg)
-
-*The evaluator is the hinge: machine instructions implement a small symbolic
-world, and that world can then describe more of itself.*
-
 The native assembly evaluator is small but capable enough to evaluate a Lisp
 evaluator written in Lisp—a descendant of McCarthy’s meta-circular evaluator.
 The Lisp-written evaluator is not hidden inside the boot sector; it is supplied
 as input. That distinction matters. The tiny native core does not contain the
 whole future system. It contains enough semantics for the next layer to exist.
-
-Conceptually, the path looks like this:
-
-```text
-hardware
-  → tiny native Lisp evaluator
-      → Lisp evaluator expressed in Lisp
-          → the programs built above it
-```
 
 I had understood bootstrapping as a compiler technique. SectorLISP made me see
 it as an architectural technique. A machine can begin with a small trusted
@@ -150,6 +136,15 @@ implemented in Lisp. Those Lisp functions calculate instruction words, write
 them into an explicitly allocated code page and invoke the resulting function
 on the emulated CPU. The C evaluator still interprets the compiler, but the
 generated function itself runs as native RV64 code.
+
+The layers now fit together like this:
+
+![QEMU contains the emulated RV64 hardware and our bare-metal platform, C evaluator, and Lisp tools; generated instructions follow a separate native execution path](../assets/diagrams/bare-metal-enlightenment.svg)
+
+*QEMU supplies the emulated hardware. Our C evaluator interprets the Lisp
+compiler and assembler; their generated code executes on the emulated CPU
+through the bootstrap native-call interface. The layers show implementation
+dependencies, not protection boundaries.*
 
 This is the first bootstrap, not the last one.
 

@@ -29,8 +29,9 @@ point before the next problem becomes a second article.
 
 ## Rebuilding visual evidence
 
-Diagrams and terminal images are reproducible and require only Python 3 plus
-the normal project toolchain:
+SVG diagrams require only Python 3. Terminal captures also require the normal
+project toolchain. The prologue PNG exports use uv, CairoSVG 2.8.2, the system
+Cairo library, and Noto Sans:
 
 ```sh
 make blog-diagrams
@@ -52,3 +53,53 @@ always be checked against their source.
 6. Add platform-specific title, subtitle, canonical URL, and tags only at
    publication time.
 7. Record the live URL and source commit in `publication-log.md`.
+
+## Reusable publication diagrams
+
+The opening article uses one architectural diagram: QEMU encloses the emulated
+hardware and our implementation layers, with a separate generated-code path.
+It has an SVG for Markdown hosts and a 1600-pixel-wide PNG for Medium beside it
+in `assets/diagrams/`.
+
+```sh
+make blog-prologue-assets   # SVG + PNG, no QEMU required
+make blog-check-diagrams   # read-only SVG freshness check
+python3 tools/blog/export_diagrams.py --format svg
+```
+
+`make blog-assets` includes these exports alongside the existing figures and
+terminal evidence. `uv` fetches the pinned CairoSVG release on first use. Cairo
+and Noto Sans must be installed separately; the SVG generator itself has no
+third-party Python dependencies. SVG fonts are not embedded. Use the PNGs for
+identical typography on publishing platforms; font and Cairo versions can
+change raster output across machines.
+
+The reusable layers are:
+
+- `tools/blog/diagramkit.py`: palette, typography, cards, planned boundaries,
+  direction-aware arrows, accessible titles/descriptions, and figure framing.
+- `tools/blog/prologue_diagrams.py`: article-specific compositions returning
+  `Diagram` objects, registered by stable output name in `diagrams()`.
+- `tools/blog/export_diagrams.py`: shared SVG/PNG export and freshness checking.
+  `--output-dir` supports previews; `--width` controls PNG resolution.
+
+For another article, reuse `Diagram`, pass its title through the `article`
+argument, and add its compositions to the mapping consumed by the exporter.
+Keep reusable primitives in the toolkit and article prose in compositions.
+The other articles still use the legacy figures in `render_diagrams.py`.
+
+Use diagrams for structure, containment, relationships, and execution paths.
+Keep explanations in normal article prose; do not turn paragraphs into cards.
+A useful diagram should convey something through spatial arrangement that a
+list of sentences would lose.
+
+Keep images close to the paragraph that introduces their question, with a
+caption explaining the implication. In Medium, upload the adjacent PNG and
+copy the Markdown caption and alt text into the corresponding image fields.
+Check figures at article width and phone width; split a dense figure rather
+than reducing its text size. A resolution increase does not enlarge labels.
+
+Before publishing, run the freshness check and inspect the exported PNGs for
+clipping, font substitutions, arrow direction, and visible planned boundaries.
+The check compares SVG source output; it does not validate PNG freshness or
+replace visual review.

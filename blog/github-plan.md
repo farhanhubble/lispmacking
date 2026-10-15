@@ -13,6 +13,8 @@ subject is complete.
 - [x] Record the originating ChatGPT question and the missing connection.
 - [x] Explain SectorLISP as a bootstrap demonstration rather than a byte-count curiosity.
 - [x] Connect the insight to the implemented Lispmacking stack and planned microkernel boundary.
+- [x] Replace the conceptual figure with a QEMU architecture diagram and keep explanations in prose.
+- [x] Export the architecture as SVG and PNG with caption and alt text.
 - [ ] Verify the SectorLISP technical claims against its primary sources.
 - [ ] Perform the final personal voice edit and publish.
 
@@ -22,8 +24,10 @@ subject is complete.
 - [x] Add deterministic SVG diagram generation.
 - [x] Capture terminal output from real hosted and QEMU tests.
 - [x] Add a publication-quality series hero.
+- [x] Add reusable diagram primitives and a read-only SVG freshness command.
+- [x] Document 1600-pixel PNG export for the prologue via pinned CairoSVG.
 - [ ] Add CI coverage that rebuilds assets and rejects stale output.
-- [ ] Document PNG export sizes for Medium and social cards.
+- [ ] Document social-card export sizes (article PNG sizing is documented).
 
 ### Article 1 — It from Bit
 

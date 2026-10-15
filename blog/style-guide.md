@@ -53,9 +53,16 @@ more like linked chapters:
 
 - Editorial hero: charcoal field-journal backdrop, matte paper texture, fine
   drafting lines, warm amber and muted teal accents.
-- Diagrams: flat charcoal background, cream text, amber execution path, teal
-  portability boundary. Use actual identifiers and addresses only when they
-  are verified.
+- New publication diagrams: warm paper background, dark text, blue runtime,
+  amber execution, violet Lisp tools/generated code, teal enforced boundaries,
+  and coral current limitations. Use labels as well as colour. Dashed outlines
+  and explicit “planned” labels distinguish future components.
+- Keep normal explanations in flowing prose. Diagrams should show architecture,
+  containment, topology, or transformations; avoid illustrated prose cards.
+- Use the shared `tools/blog/diagramkit.py` components. Prefer one question per
+  figure, short labels, and readable text at article width. Existing dark
+  figures can migrate article by article; terminal captures retain their palette.
+- Use actual identifiers and addresses only when they are verified.
 - Terminal: render real transcripts in the same palette; include the command
   and enough output to establish the claim.
 - Never generate pseudo-code inside artwork. Real code belongs in typeset
