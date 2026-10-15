@@ -1,6 +1,6 @@
 <!--
 title: Bare Metal Enlightenment
-subtitle: How one question about SectorLISP became an attempt to grow a Lisp machine on RISC-V
+subtitle: How "What is so cool about SectorLISP?" turned into Lispmacking OS 
 status: substantial draft
 hero: ../assets/artwork/lispmacking-series-hero.png
 reading_time: 7 minutes
@@ -8,16 +8,14 @@ reading_time: 7 minutes
 
 # Bare Metal Enlightenment
 
-The project began with a question I thought I already knew the answer to.
+I am familiar with Lisp, having programmed a little bit in Scheme and Common Lisp. I also know Lambda Calculus from my tryst with functional programming. I have done a fair bit of bare metal programming in C and different families of assembly. So I have a good understanding of how bootstrapping works for operating systems and programming languages.  
 
-> What’s so cool about SectorLISP?
+Many, many years ago I had read about SectorLISP and was awed by its tiny footprint of a few hundred bytes. I knew that writing anything substantial and useful, even in raw assembly, would result in much larger code. Only my LED blinking 101 programs were shorter than SectorLISP. 
 
-I typed it into ChatGPT one day, not as someone encountering either half of
-the name for the first time. I knew about bare-metal programming. I had
-written enough Lisp to understand its central trick. I knew that SectorLISP
-could boot directly into a tiny Lisp interpreter.
+So I recently wondered: "What is so cool about Sector LISP?"
 
-I knew all the facts. I had not understood the connection.
+
+## What is so cool about SectorLISP?
 
 ChatGPT’s answer began with an almost unreasonable comparison: a complete,
 programmable, garbage-collected Lisp could be smaller than an empty modern
