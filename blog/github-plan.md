@@ -16,7 +16,8 @@ subject is complete.
 - [x] Replace the conceptual figure with a QEMU architecture diagram and keep explanations in prose.
 - [x] Export the architecture as SVG and PNG with caption and alt text.
 - [ ] Verify the SectorLISP technical claims against its primary sources.
-- [ ] Perform the final personal voice edit and publish.
+- [x] Carry the revised introduction’s conversational voice through the prologue.
+- [ ] Obtain the author’s final voice review and publish.
 
 ### Establish the reproducible blog asset pipeline
 

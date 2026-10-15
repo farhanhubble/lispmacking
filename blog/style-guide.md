@@ -21,6 +21,20 @@ Segmentation*, *Graceful API Failure 101 for Data Scientists*, and
 - End by saying what the experiment made possible, then point at the next
   unresolved problem.
 
+## Anchor for the opening article
+
+Farhan's revised prologue introduction is the voice reference: concrete
+experience with Scheme, Common Lisp, C and assembly, a modest LED-blinking
+comparison, and a direct question. Carry that voice through the explanation.
+
+- Use first person for the author's experience and “we” for project work.
+- Let humour come from a concrete detail already in the story; do not invent
+  personal anecdotes or reactions to make the narrative livelier.
+- Explain why each implementation step follows from the previous one.
+- Prefer connected paragraphs over repeated dramatic one-line reveals.
+- Keep limitations specific and conversational, without turning the roadmap
+  into a manifesto. Leave technical structure to the architecture diagram.
+
 ## Adjustments for this series
 
 The older long-form tutorial style is valuable, but this series should read

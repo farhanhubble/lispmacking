@@ -1,6 +1,6 @@
 <!--
 title: Bare Metal Enlightenment
-subtitle: How "What is so cool about SectorLISP?" turned into Lispmacking OS 
+subtitle: How "What is so cool about SectorLISP?" turned into Lispmacking OS
 status: substantial draft
 hero: ../assets/artwork/lispmacking-series-hero.png
 reading_time: 7 minutes
@@ -8,184 +8,156 @@ reading_time: 7 minutes
 
 # Bare Metal Enlightenment
 
-I am familiar with Lisp, having programmed a little bit in Scheme and Common Lisp. I also know Lambda Calculus from my tryst with functional programming. I have done a fair bit of bare metal programming in C and different families of assembly. So I have a good understanding of how bootstrapping works for operating systems and programming languages.  
+I am familiar with Lisp, having programmed a little bit in Scheme and Common Lisp. I also know Lambda Calculus from my tryst with functional programming. I have done a fair bit of bare metal programming in C and different families of assembly. So I have a good understanding of how bootstrapping works for operating systems and programming languages.
 
-Many, many years ago I had read about SectorLISP and was awed by its tiny footprint of a few hundred bytes. I knew that writing anything substantial and useful, even in raw assembly, would result in much larger code. Only my LED blinking 101 programs were shorter than SectorLISP. 
+Many, many years ago I had read about SectorLISP and was awed by its tiny footprint of a few hundred bytes. I knew that writing anything substantial and useful, even in raw assembly, would result in much larger code. Only my LED blinking 101 programs were shorter than SectorLISP.
 
 So I recently wondered: "What is so cool about Sector LISP?"
 
 
 ## What is so cool about SectorLISP?
 
-ChatGPT’s answer began with an almost unreasonable comparison: a complete,
-programmable, garbage-collected Lisp could be smaller than an empty modern
-word-processing document. The current core of SectorLISP is roughly 436 bytes
-of 16-bit x86 machine code, packaged as a 512-byte boot sector. A BIOS can load
-it at `0x7c00`, transfer control to it and arrive directly in Lisp.
+I put the question to ChatGPT. Its answer started with a comparison that put
+my LED programs in their place: a Lisp with a garbage collector could take up
+less space than an empty modern word-processing document.
 
-No operating system is waiting underneath. There is no filesystem, C runtime,
-standard library or virtual machine quietly doing the difficult work.
+The [436-byte version](https://justine.lol/sectorlisp2/) fits into a 512-byte
+boot sector. The BIOS loads it and hands over control. You can then enter
+Lisp expressions without first booting an operating system.
 
-That was not new information to me. This time, however, it landed differently.
+That is a lot to fit into the space where I would normally expect just enough
+code to load something larger. I understood why the size was impressive. What
+needed a little more thought was what you could do once that Lisp was running.
 
-## The byte count is the bait
+## A few hundred bytes, then what?
 
-It is natural to look at SectorLISP as an extraordinary piece of code golf.
-The [official project](https://github.com/jart/sectorlisp) contains a bootable
-i8086 implementation, a portable C reference implementation and a pure Lisp
-evaluator. The [436-byte version](https://justine.lol/sectorlisp2/) even
-includes a copying garbage collector.
+The [SectorLISP repository](https://github.com/jart/sectorlisp) has three useful
+pieces to look at together: the bootable i8086 implementation, a readable C
+reference implementation, and an evaluator written in Lisp. The native
+implementation can run that Lisp-written evaluator, which can in turn
+evaluate another Lisp program.
 
-That is an astonishing engineering result. But the number is not the part
-that stayed with me.
+This is where Lisp's habit of representing programs as lists becomes useful.
+The evaluator written in Lisp arrives as ordinary input. It does not need to
+be squeezed into the boot sector along with the native evaluator.
 
-The profound claim is that a useful language does not have to arrive after the
-machine has acquired an operating system, a process model, a runtime loader and
-several layers of libraries. A sufficiently small evaluator can be among the
-first ideas the machine encounters.
+The small language underneath needs atoms, cons cells, quotation, conditionals
+and function application. Operations such as `car`, `cdr` and `cons` let it
+inspect and build lists. That is enough to express the next evaluator. It is
+a very small Lisp, of course; nobody is claiming to have fitted Common Lisp
+into a boot sector.
 
-Lisp is unusually well suited to this experiment. Its source language and its
-runtime data share the same basic representation. Lists hold programs, but
-they also hold the data manipulated by those programs. Once a reader can
-construct atoms and cons cells, the evaluator does not need a separate abstract
-syntax tree, bytecode file or compiler intermediate representation before it
-can begin.
+The byte count got my attention. Running another evaluator on top of those
+bytes gave me something to think about.
 
-At the centre is a remarkably small vocabulary:
+## The connection I had missed
 
-- atoms and cons cells;
-- `car`, `cdr` and `cons`;
-- quotation;
-- tests and conditionals;
-- function application.
+In bare metal programming, I expect to spend time on stack pointers, memory
+maps and device registers before anything interesting happens. A program can
+fail before it has a way to tell you what went wrong. Getting an LED to blink
+is useful precisely because it tells you that at least some of this is working.
 
-Even integers are not required for universal computation. They can be built
-structurally from lists when convenience and speed are not the objective.
+Lisp feels a long way from that. You enter an expression, inspect a list, apply
+a function. The machine is still doing the work, but you get to think in terms
+of the program rather than the registers holding it.
 
-The 436 bytes are therefore evidence, not merely a record. They demonstrate
-how little physical machinery is required before symbolic evaluation can
-begin.
+SectorLISP puts these two experiences very close together. A few hundred bytes
+of native code are enough to get from the boot sector to evaluating symbolic
+expressions. After that, some of the work of building the environment can
+happen in Lisp itself.
 
-## The missing connection
+I already knew about bootstrapping operating systems and languages. What I had
+not quite connected was how early the language could become useful in building
+the rest of the system. You could start with a small evaluator and gradually
+give it the tools to work on the machine around it.
 
-I had previously kept two mental models in separate drawers.
+That seemed like something worth trying.
 
-Bare-metal programming meant reset vectors, linker scripts, stack pointers,
-memory maps and device registers. It was about accepting every obligation an
-operating system normally hides.
+## This is how Lispmacking started
 
-Lisp meant symbolic expressions, recursive evaluation, closures and the
-peculiar pleasure of treating programs as ordinary data.
+The question became fairly practical: what would we need to add to a small
+Lisp to start building an operating environment with it?
 
-SectorLISP joined the drawers.
+That experiment is **Lispmacking**. We chose 64-bit RISC-V on QEMU's `virt`
+machine, with room to make the implementation readable and easy to inspect.
+SectorLISP's byte budget is impressive, but I had enough questions without
+also trying to save every last byte.
 
-The native assembly evaluator is small but capable enough to evaluate a Lisp
-evaluator written in Lisp—a descendant of McCarthy’s meta-circular evaluator.
-The Lisp-written evaluator is not hidden inside the boot sector; it is supplied
-as input. That distinction matters. The tiny native core does not contain the
-whole future system. It contains enough semantics for the next layer to exist.
-
-I had understood bootstrapping as a compiler technique. SectorLISP made me see
-it as an architectural technique. A machine can begin with a small trusted
-seed, then use the language brought to life by that seed to construct more of
-its own environment.
-
-That was the enlightenment.
-
-## A question becomes a project
-
-The ChatGPT conversation could have ended with an elegant explanation and a
-few links. Instead it left a more dangerous question behind:
-
-> What would it look like to grow a Lisp machine this way, one explicit
-> boundary at a time?
-
-The answer became **Lispmacking**.
-
-This is not an attempt to reproduce SectorLISP byte for byte. Its constraints
-are part of its beauty: 16-bit x86, a BIOS boot sector and optimisation at the
-scale of individual instruction bytes. We chose a different experiment. The
-target is 64-bit RISC-V on QEMU’s `virt` machine. The immediate priorities are
-clarity, observability and boundaries that can eventually be enforced—not the
-smallest possible binary.
-
-We began below Lisp. The first RV64 image established a stack, cleared its own
-uninitialised memory and wrote one sentence through a UART:
+We started with the familiar bare metal chores. Set up a stack, clear the
+uninitialised data, and write something through the serial port. Our equivalent
+of the blinking LED was:
 
 ```text
 Lisp machine booted.
 ```
 
-Then we built a small Lisp evaluator in portable C. The same evaluator runs in
-two environments: as a normal hosted process for quick tests, and as a
-freestanding bare-metal program with its own allocator and serial console.
-The hosted version gives us rapid feedback. The QEMU version tells us whether
-we have accidentally relied on an operating system.
+There was no Lisp at that point. The message was a little ahead of the
+implementation.
 
-Next came the machine-facing vocabulary: signed integers, checked arithmetic,
-page allocation, bounded memory access and a visibly privileged `bootstrap:`
-interface. That allowed Lisp programs to reason about machine words without
-quietly giving every ordinary expression unrestricted authority.
+Next came a small evaluator in C. We made the same evaluator run both as a
+normal program on the development machine and as a bare-metal program in QEMU.
+That gives us a convenient place to test the language, and a second place to
+check that it works with our own allocator and serial console. The language
+code is shared; the allocation and I/O adapters change.
 
-Then Lisp wrote RISC-V.
+To let Lisp do useful work with the machine, we added integers, checked
+arithmetic, page allocation and bounded memory access. Operations that reach
+machine state have a conspicuous `bootstrap:` prefix. These are privileged
+tools for bringing the system up. Naming them separately makes that authority
+visible, though the name itself provides no isolation.
 
-The project now contains an RV64 assembler and restricted native compiler
-implemented in Lisp. Those Lisp functions calculate instruction words, write
-them into an explicitly allocated code page and invoke the resulting function
-on the emulated CPU. The C evaluator still interprets the compiler, but the
-generated function itself runs as native RV64 code.
+With those pieces in place, we could write an assembler and a restricted
+compiler in Lisp. They calculate RISC-V instruction words and write them into
+a code page. We can then call the generated function on the emulated CPU.
 
-The layers now fit together like this:
+There are two kinds of execution here, and it is easy to mix them up. The C
+evaluator still interprets the Lisp compiler. The function produced by that
+compiler runs as native RISC-V instructions. We have taken a step towards
+bootstrapping more of the system in Lisp; we have not compiled away the C
+evaluator.
 
 ![QEMU contains the emulated RV64 hardware and our bare-metal platform, C evaluator, and Lisp tools; generated instructions follow a separate native execution path](../assets/diagrams/bare-metal-enlightenment.svg)
 
-*QEMU supplies the emulated hardware. Our C evaluator interprets the Lisp
-compiler and assembler; their generated code executes on the emulated CPU
-through the bootstrap native-call interface. The layers show implementation
-dependencies, not protection boundaries.*
+*The stack on the left shows what supports the Lisp tools. The path on the
+right shows where their generated code goes. Everything inside the emulated
+machine still runs with machine-mode authority.*
 
-This is the first bootstrap, not the last one.
+## How much of an OS is this?
 
-## What we are actually building
+At the moment, there is quite a bit left to build. The evaluator is written in
+C, and its allocator keeps handing out memory without reclaiming it. Restarting
+the machine is our current way of getting that memory back. Generated code
+pages remain writable, and all bare-metal execution happens in RISC-V machine
+mode, with access to privileged machine operations.
 
-“Lisp machine” can suggest a finished historical workstation, a special
-processor or a system in which every component is already written in Lisp.
-Lispmacking is none of those things yet.
+The checks around a native call can reject a bad entry address. They cannot
+stop a function from doing damage once it starts running. We have no process
+isolation, page tables, capabilities or user-space drivers yet. So the
+microkernel in the project description is still a goal.
 
-The current machine has serious and deliberate limitations. Its evaluator is
-written in C. Allocation is a bump arena with no reclamation. Bare-metal code
-runs entirely in RISC-V machine mode. Generated code pages remain writable,
-and validation is standing in for isolation. There are no processes, page
-tables, capabilities or user-space drivers.
+The next substantial experiment is to run two isolated Lisp environments on
+the same machine. Each should have its own memory and be able to communicate
+with the other only through an endpoint it has been explicitly given. Getting
+there means adding page tables, privilege transitions, traps, scheduling and
+capability-controlled communication.
 
-Calling that a microkernel would turn a destination into a description.
+After that, we want to move facilities such as the console and device drivers
+into separate services. A VirtIO device will give us a concrete operation to
+try. The small privileged core should enforce access and communication; the
+services should decide what useful work to do with them.
 
-The next stages are meant to earn the word. Page tables, traps and privilege
-transitions will create an enforced boundary. Two isolated Lisp worlds should
-be able to communicate only through an explicitly granted endpoint. Useful
-policy—including device policy—should move into user-space services, beginning
-with a real VirtIO-backed operation.
+There is plenty of work between the current serial prompt and that system.
+The useful thing is that we now have somewhere to start experimenting.
 
-The intended shape is therefore not “Lisp running on a tiny operating system.”
-It is a small privileged mechanism that lets isolated Lisp worlds become the
-operating environment.
+## Back to the original question
 
-SectorLISP showed that a language can grow from an extraordinarily small
-computational seed. Lispmacking asks how far that method can be carried when
-the goal is not only universality, but isolation, authority and useful machine
-services.
+I came back to SectorLISP wondering about its tiny footprint. What I took away
+was a way to connect two things I had worked with separately: bringing a
+machine up from bare metal, and building programs in Lisp.
 
-## The first useful idea
+An evaluator can be an early part of bringing up the machine. Once it works,
+the language becomes another tool for building what comes next. Lispmacking
+is our attempt to see how far we can take that idea.
 
-The revelation was not that Lisp could run on bare metal. I already knew that
-it could.
-
-It was that bare metal and Lisp describe consecutive parts of the same story.
-The startup code creates the physical conditions for evaluation. The evaluator
-creates a symbolic world. That world can then participate in constructing the
-machine around it.
-
-I asked ChatGPT what was so cool about SectorLISP. The answer became a project
-to find out, one layer at a time.
-
-The other articles in this series are those layers.
+The next article starts with the part before any of the Lisp worked: getting
+QEMU to print that slightly premature greeting.
