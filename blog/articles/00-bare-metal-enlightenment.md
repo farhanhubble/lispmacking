@@ -1,51 +1,83 @@
 <!--
 title: Bare Metal Enlightenment
-subtitle: How "What is so cool about SectorLISP?" turned into Lispmacking OS
+subtitle: Discovering What Makes SectorLisp So Remarkable by Building My Own
 status: substantial draft
 hero: ../assets/artwork/lispmacking-series-hero.png
 reading_time: 7 minutes
+medium_draft: https://medium.com/@farhanhubble/bare-metal-enlightenment-2bef0ac95bd0
 -->
 
 # Bare Metal Enlightenment
 
-I am familiar with Lisp, having programmed a little bit in Scheme and Common Lisp. I also know Lambda Calculus from my tryst with functional programming. I have done a fair bit of bare metal programming in C and different families of assembly. So I have a good understanding of how bootstrapping works for operating systems and programming languages.
+*Discovering What Makes SectorLisp So Remarkable by Building My Own*
 
-Many, many years ago I had read about SectorLISP and was awed by its tiny footprint of a few hundred bytes. I knew that writing anything substantial and useful, even in raw assembly, would result in much larger code. Only my LED blinking 101 programs were shorter than SectorLISP.
+I read about SectorLisp years ago and was awed by its tiny footprint of just a
+few hundred bytes. After all, I had programmed in different flavors of
+assembly and C, including low-level hardware operations, and knew well that any
+program that did anything substantial, other than blink LEDs, was well larger
+than this size. So, to me, it was a marvel that we could fit a language of any
+kind into such a small space.
 
-So I recently wondered: "What is so cool about Sector LISP?"
+To refresh my memory, I asked ChatGPT, “What is so cool about SectorLisp?” and
+it replied:
 
+> A complete, programmable, garbage-collected Lisp can be smaller than an
+> empty modern Word document.
 
-## What is so cool about SectorLISP?
+Okay, that was mind-blowingly impressive. But how?
 
-I put the question to ChatGPT. Its answer started with a comparison that put
-my LED programs in their place: a Lisp with a garbage collector could take up
-less space than an empty modern word-processing document.
+I had dabbled in Common Lisp and Scheme and even had a tryst with Lambda
+Calculus, so I was familiar with how it could describe arbitrary computations
+using a very minimalistic set of operations:
 
-The [436-byte version](https://justine.lol/sectorlisp2/) fits into a 512-byte
-boot sector. The BIOS loads it and hands over control. You can then enter
-Lisp expressions without first booting an operating system.
+- Defining functions
+- Applying functions
+- Passing functions and values around
+- Obtaining recursion without requiring a separate looping construct
 
-That is a lot to fit into the space where I would normally expect just enough
-code to load something larger. I understood why the size was impressive. What
-needed a little more thought was what you could do once that Lisp was running.
+But Lisp did not implement Lambda Calculus, per se. Lambda Calculus was too
+inefficient in some regards. For example, pure Lambda Calculus constructs
+numbers using functions.
+
+I also knew that one of Lisp’s other great powers was its use of lists to
+represent both code and data, which meant that Lisp evaluators, by virtue of
+being able to parse lists of data, could equally easily parse other Lisp code.
+
+To get a better understanding of what made SectorLisp so elegant and powerful,
+I had to dig in.
 
 ## A few hundred bytes, then what?
 
-The [SectorLISP repository](https://github.com/jart/sectorlisp) has three useful
+The [436-byte version](https://justine.lol/sectorlisp2/) fits into a 512-byte
+boot sector. The BIOS loads it at address `0x7c00` and hands over control. You
+can then enter Lisp expressions without first booting an operating system.
+
+There is no filesystem, C runtime, standard library or virtual machine hiding
+underneath it. That is a lot to fit into the space where I would normally
+expect just enough code to load something larger.
+
+It even includes a copying garbage collector.
+
+Tiny language demonstrations can avoid memory management by allocating until
+they run out of memory. SectorLisp does not take that escape route. It recovers
+unreachable memory and continues, all while remaining smaller than many icons
+on my laptop.
+
+The [SectorLisp repository](https://github.com/jart/sectorlisp) has three useful
 pieces to look at together: the bootable i8086 implementation, a readable C
 reference implementation, and an evaluator written in Lisp. The native
-implementation can run that Lisp-written evaluator, which can in turn
-evaluate another Lisp program.
+implementation can run that Lisp-written evaluator, which can in turn evaluate
+another Lisp program.
 
-This is where Lisp's habit of representing programs as lists becomes useful.
+This is where Lisp’s habit of representing programs as lists becomes useful.
 The evaluator written in Lisp arrives as ordinary input. It does not need to
 be squeezed into the boot sector along with the native evaluator.
 
 The small language underneath needs atoms, cons cells, quotation, conditionals
 and function application. Operations such as `car`, `cdr` and `cons` let it
-inspect and build lists. That is enough to express the next evaluator. It is
-a very small Lisp, of course; nobody is claiming to have fitted Common Lisp
-into a boot sector.
+inspect and build lists. That is enough to express the next evaluator. It is a
+very small Lisp, of course; nobody is claiming to have fitted Common Lisp into
+a boot sector.
 
 The byte count got my attention. Running another evaluator on top of those
 bytes gave me something to think about.
@@ -61,27 +93,39 @@ Lisp feels a long way from that. You enter an expression, inspect a list, apply
 a function. The machine is still doing the work, but you get to think in terms
 of the program rather than the registers holding it.
 
-SectorLISP puts these two experiences very close together. A few hundred bytes
+SectorLisp puts these two experiences very close together. A few hundred bytes
 of native code are enough to get from the boot sector to evaluating symbolic
 expressions. After that, some of the work of building the environment can
 happen in Lisp itself.
+
+Conceptually, the machine grows like this:
+
+```text
+hardware
+  → tiny assembly Lisp
+      → Lisp evaluator written in Lisp
+          → arbitrary Lisp programs
+```
 
 I already knew about bootstrapping operating systems and languages. What I had
 not quite connected was how early the language could become useful in building
 the rest of the system. You could start with a small evaluator and gradually
 give it the tools to work on the machine around it.
 
-That seemed like something worth trying.
+I had thought of bootstrapping as something compilers did.
+
+Now I could see it as a way to build a machine.
 
 ## This is how Lispmacking started
 
 The question became fairly practical: what would we need to add to a small
 Lisp to start building an operating environment with it?
 
-That experiment is **Lispmacking**. We chose 64-bit RISC-V on QEMU's `virt`
-machine, with room to make the implementation readable and easy to inspect.
-SectorLISP's byte budget is impressive, but I had enough questions without
-also trying to save every last byte.
+That experiment is [**Lispmacking**](https://github.com/farhanhubble/lispmacking).
+We chose 64-bit RISC-V on QEMU’s `virt` machine, with room to make the
+implementation readable and easy to inspect. SectorLisp’s byte budget is
+impressive, but I had enough questions without also trying to save every last
+byte.
 
 We started with the familiar bare metal chores. Set up a stack, clear the
 uninitialised data, and write something through the serial port. Our equivalent
@@ -146,18 +190,25 @@ into separate services. A VirtIO device will give us a concrete operation to
 try. The small privileged core should enforce access and communication; the
 services should decide what useful work to do with them.
 
-There is plenty of work between the current serial prompt and that system.
-The useful thing is that we now have somewhere to start experimenting.
+There is plenty of work between the current serial prompt and that system. The
+useful thing is that we now have somewhere to start experimenting.
 
 ## Back to the original question
 
-I came back to SectorLISP wondering about its tiny footprint. What I took away
+I came back to SectorLisp wondering about its tiny footprint. What I took away
 was a way to connect two things I had worked with separately: bringing a
 machine up from bare metal, and building programs in Lisp.
 
-An evaluator can be an early part of bringing up the machine. Once it works,
-the language becomes another tool for building what comes next. Lispmacking
-is our attempt to see how far we can take that idea.
+The enlightenment was not that Lisp could run on bare metal. I already knew
+that.
+
+It was that an evaluator could be an early part of bringing up the machine.
+Once it works, the language becomes another tool for building what comes next.
+Lispmacking is our attempt to see how far we can take that idea.
+
+I asked ChatGPT what was so cool about SectorLisp.
+
+The answer became a project to find out.
 
 The next article starts with the part before any of the Lisp worked: getting
 QEMU to print that slightly premature greeting.
