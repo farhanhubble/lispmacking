@@ -95,8 +95,9 @@ native entry.
 
 This distinction prevents accidental jumps to arbitrary RAM, but it is not
 W^X isolation: code pages remain writable while this bootstrap compiler is
-active, and execution still occurs in machine mode. Milestone 6 must replace
-this mechanism with page-table permissions and a user/supervisor boundary.
+active, and execution still occurs in machine mode. The separate [M6 microkernel](microkernel.md) now implements
+page-table permissions and a user/supervisor boundary for the evaluator, but
+does not expose this compiler's privileged code-page operations to user mode.
 
 ## Reproducible demonstration
 

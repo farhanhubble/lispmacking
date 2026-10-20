@@ -111,15 +111,30 @@ and an explicitly allocated code page. `make test-qemu` loads the Lisp sources,
 compiles four functions, executes generated calls, branches, and memory
 stores, and checks native results against the evaluator.
 
-## Planned milestones
+## Completed microkernel boundary
 
 ### Milestone 6 — Microkernel boundary
 
-Introduce page tables, privilege transitions, traps, timers, threads, IPC, and
-capabilities. Keep policy out of the privileged core wherever practical.
+Status: complete for the bounded QEMU acceptance target.
 
-Acceptance demonstration: run two isolated language worlds that communicate
-only through an explicitly granted endpoint.
+The separate `microkernel/` image enters S mode and runs two copies of the
+portable evaluator in U mode with private Sv39 address spaces. It implements
+full integer trap frames, timer-driven round-robin scheduling, fixed per-world
+capability tables, synchronous scalar IPC, and peer-fault/exit cleanup.
+
+Acceptance demonstration: `make test-qemu-m6` runs two isolated language worlds
+that exchange values only through explicitly granted endpoints. It also checks
+13 scenarios including missing/wrong capabilities, timer preemption inside a
+non-yielding loop, hardware-enforced memory/CSR denials, and peer survival.
+`make test` and the existing M4/M5 QEMU tests remain green.
+
+This milestone is deliberately bounded: two static worlds, one thread each,
+boot-time grants, no capability transfer, and no dynamic user code generation.
+The M4/M5 machine-mode laboratory remains a separate target. Console output is
+still a privileged diagnostic facility. See [Microkernel boundary](microkernel.md)
+for the ABI, memory layout, evidence, and remaining limitations.
+
+## Planned milestones
 
 ### Milestone 7 — User-space services
 

@@ -19,7 +19,7 @@ comparison of the two environments.
 
 ## Current status
 
-Milestones 0 through 5 are implemented:
+Milestones 0 through 6 are implemented:
 
 - RISC-V cross-toolchain and QEMU environment validated;
 - bare-metal RV64 startup, stack initialization, `.bss` clearing, and UART;
@@ -31,7 +31,9 @@ Milestones 0 through 5 are implemented:
   allowlisted CSRs, and interrupt state;
 - a Lisp-written RV64 assembler and restricted native compiler;
 - validated execution of generated Lisp functions under QEMU;
-- source-level debugging through QEMU's GDB stub.
+- source-level debugging through QEMU's GDB stub;
+- a separate S-mode microkernel target with two isolated U-mode Lisp worlds,
+  timer-driven scheduling, and capability-checked IPC.
 
 An example QEMU session:
 
@@ -43,6 +45,10 @@ lisp> (((lambda (x) (lambda (y) (cons x (cons y nil)))) 'a) 'b)
 (a b)
 lisp>
 ```
+
+The M6 target is a bounded acceptance demonstrator. It uses the same VM in
+isolated user address spaces; `make run` retains the original machine-mode
+bootstrap REPL. See [Microkernel boundary](docs/microkernel.md).
 
 ## Language subset
 
@@ -123,11 +129,21 @@ make test-qemu
 
 Build products are placed under `build/`. Remove them with `make clean`.
 
+### Isolated Lisp worlds (M6)
+
+```sh
+make run-microkernel    # boot the isolation and IPC demonstrations
+make test-qemu-m6       # run all 13 bounded acceptance scenarios
+```
+
+M6 builds `build/microkernel/kernel.elf` and embeds a separately linked user
+image. Python 3 is required for the build helpers and acceptance runner.
+
 ## Testing
 
 ```sh
 make test        # hosted reader/evaluator/printer tests
-make test-qemu   # cross-build and execute expressions on emulated RV64
+make test-qemu   # M4/M5 bootstrap tests plus M6 isolation/IPC acceptance
 ```
 
 The QEMU test checks ordinary evaluation, integer overflow, page allocation,
@@ -156,6 +172,7 @@ enter the Lisp prompt after startup.
 ```text
 boot/                 RISC-V entry point and linker script
 kernel/               bare-metal REPL entry
+microkernel/          S-mode kernel, U-mode adapter, boot and trap paths
 platform/hosted/      standard C allocation and terminal adapter
 platform/riscv64/     QEMU UART, bump allocator, and shutdown adapter
 vm/                   portable object model, reader, evaluator, and printer
@@ -176,6 +193,8 @@ transcripts with `make blog-assets`.
 
 ## Current limitations
 
+The original M4/M5 bootstrap REPL has these limitations:
+
 - Allocation is a bump arena; objects are not reclaimed until restart.
 - The bare-metal input line is limited to 4095 characters.
 - The evaluator is recursive and uses a fixed 16 KiB stack in QEMU.
@@ -188,13 +207,16 @@ transcripts with `make blog-assets`.
 - Executable bootstrap pages remain writable and generated code still runs in
   machine mode.
 
+The M6 image adds user isolation but currently has two static worlds, one thread
+per world, fixed boot-time capability grants, and scalar rendezvous IPC. It has
+no dynamic process creation or capability transfer, and does not yet expose
+the native compiler's code-generation interface to user worlds. Its supervisor
+mapping is broad and RWX, and console output remains in the kernel.
+
 ## Roadmap
 
-The next planned stages are:
-
-1. page tables, privilege transitions, traps, scheduling, IPC, and
-   capabilities;
-2. isolated user-space services and VirtIO drivers.
+The next milestone is M7: isolated user-space services and VirtIO drivers.
+M6 now provides the initial page-table, scheduling, IPC, and capability boundary.
 
 See the [project roadmap](docs/roadmap.md) for milestone definitions, current
 status, and acceptance criteria. The original experimental direction is

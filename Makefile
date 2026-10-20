@@ -77,7 +77,7 @@ debug: all
 	@echo "QEMU paused; connect with: riscv64-elf-gdb $(ELF) -ex 'target remote :1234'"
 	$(QEMU) $(QEMU_FLAGS) -S -s
 
-test-qemu: test-qemu-m4 test-qemu-m5
+test-qemu: test-qemu-m4 test-qemu-m5 test-qemu-m6
 
 test-qemu-m4: all
 	@{ \
@@ -204,3 +204,5 @@ blog-prologue-assets:
 
 blog-check-diagrams:
 	python3 tools/blog/export_diagrams.py --check
+
+include microkernel/build.mk

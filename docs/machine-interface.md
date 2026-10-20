@@ -85,6 +85,8 @@ returns a `0` or `1` restoration token. `(bootstrap:interrupts-restore token)`
 restores that previous state. Nesting is safe when each caller restores its own
 token in reverse order.
 
-These operations currently run in RISC-V machine mode. Milestone 6 must replace
-their broad bootstrap authority with capabilities and a real user/supervisor
-boundary.
+These operations remain in the original M4/M5 machine-mode laboratory. The
+separate [M6 microkernel](microkernel.md) supplies a user/supervisor boundary;
+its U-mode VM adapters leave these callbacks unavailable and expose
+capability-checked IPC instead. Moving native code generation into those
+isolated worlds remains future work.

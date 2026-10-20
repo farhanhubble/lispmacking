@@ -129,3 +129,17 @@ The current bare-metal adapter is specifically tied to:
 - its 16550-compatible UART and test device.
 
 Those are adapter constraints rather than Lisp-language constraints.
+
+## M6: isolated user-mode worlds
+
+The original two-environment evaluator and M4/M5 machine-mode compiler remain
+available. A separate `microkernel/` target now supplies the next protection
+boundary: an S-mode kernel and two U-mode instances of that same portable VM.
+Each instance has private code/data backing, heap, stack and Sv39 page tables.
+Timer interrupts drive scheduling; local capability slots authorize scalar
+rendezvous IPC. User adapters expose no privileged bootstrap callbacks.
+
+`make test-qemu-m6` verifies successful Lisp IPC, missing/wrong-right capability
+denials, actual timer preemption, forbidden memory and CSR accesses, and peer
+survival after faults. See [Microkernel boundary](microkernel.md) for the
+memory map, syscall ABI, static boot policy, and remaining limitations.
