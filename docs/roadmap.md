@@ -1,10 +1,12 @@
 # Project roadmap
 
 This document defines the technical milestones for growing the current Lisp
-runtime into an experimental capability-oriented microkernel. GitHub issues
-track individual deliverables; GitHub milestones group those issues and report
-execution progress. This file remains the source of truth for the intent and
-acceptance criteria of each stage.
+runtime into an experimental capability-oriented microkernel. The private
+[Lispmacking Project](https://github.com/users/farhanhubble/projects/2) is the
+execution board. Repository milestones group its linked issues; each M8–M19
+milestone has a detailed tracking issue, with deliverable issues added as work
+begins. This file and its linked definitions specify intent and acceptance;
+the Project records execution status.
 
 Milestone numbers identify deliverables; explicit dependencies determine execution
 order. Completion requires the demonstration and tests on each milestone's named
@@ -183,20 +185,20 @@ managed worlds, asynchronous services and multicore remain distinct milestones.
 C3 support is RISC-V only; IDF runtime bring-up and our native kernel port are
 separate deliverables. Advanced hardware features are optional target capabilities.
 
-| Milestone | Status |
-|---|---|
-| [M8 — Interactive Lisp workspace](https://github.com/farhanhubble/lispmacking/milestone/6) | Planned |
-| [M9 — ESP32-C3 runtime](https://github.com/farhanhubble/lispmacking/milestone/7) | Planned |
-| [M10 — Native systems Lisp](https://github.com/farhanhubble/lispmacking/milestone/8) | Planned |
-| [M11 — Language and compiler extensibility](https://github.com/farhanhubble/lispmacking/milestone/9) | Planned |
-| [M12 — Persistent language workspace](https://github.com/farhanhubble/lispmacking/milestone/10) | Planned |
-| [M13 — Managed worlds and service lifecycle](https://github.com/farhanhubble/lispmacking/milestone/11) | Planned |
-| [M14 — Native ESP32-C3 kernel](https://github.com/farhanhubble/lispmacking/milestone/12) | Planned |
-| [M15 — Vector/SIMD execution](https://github.com/farhanhubble/lispmacking/milestone/13) | Planned |
-| [M16 — Asynchronous services](https://github.com/farhanhubble/lispmacking/milestone/14) | Planned |
-| [M17 — Multicore execution and measurement](https://github.com/farhanhubble/lispmacking/milestone/15) | Planned |
-| [M18 — First accelerator package](https://github.com/farhanhubble/lispmacking/milestone/16) | Planned |
-| [M19 — Connected and recursive worlds](https://github.com/farhanhubble/lispmacking/milestone/17) | Planned |
+| Milestone | Tracking issue | Status |
+|---|---|---|
+| [M8 — Interactive Lisp workspace](https://github.com/farhanhubble/lispmacking/milestone/6) | [#29](https://github.com/farhanhubble/lispmacking/issues/29) | Planned |
+| [M9 — ESP32-C3 runtime](https://github.com/farhanhubble/lispmacking/milestone/7) | [#30](https://github.com/farhanhubble/lispmacking/issues/30) | Planned |
+| [M10 — Native systems Lisp](https://github.com/farhanhubble/lispmacking/milestone/8) | [#31](https://github.com/farhanhubble/lispmacking/issues/31) | Planned |
+| [M11 — Language and compiler extensibility](https://github.com/farhanhubble/lispmacking/milestone/9) | [#32](https://github.com/farhanhubble/lispmacking/issues/32) | Planned |
+| [M12 — Persistent language workspace](https://github.com/farhanhubble/lispmacking/milestone/10) | [#33](https://github.com/farhanhubble/lispmacking/issues/33) | Planned |
+| [M13 — Managed worlds and service lifecycle](https://github.com/farhanhubble/lispmacking/milestone/11) | [#34](https://github.com/farhanhubble/lispmacking/issues/34) | Planned |
+| [M14 — Native ESP32-C3 kernel](https://github.com/farhanhubble/lispmacking/milestone/12) | [#35](https://github.com/farhanhubble/lispmacking/issues/35) | Planned |
+| [M15 — Vector/SIMD execution](https://github.com/farhanhubble/lispmacking/milestone/13) | [#36](https://github.com/farhanhubble/lispmacking/issues/36) | Planned |
+| [M16 — Asynchronous services](https://github.com/farhanhubble/lispmacking/milestone/14) | [#37](https://github.com/farhanhubble/lispmacking/issues/37) | Planned |
+| [M17 — Multicore execution and measurement](https://github.com/farhanhubble/lispmacking/milestone/15) | [#38](https://github.com/farhanhubble/lispmacking/issues/38) | Planned |
+| [M18 — First accelerator package](https://github.com/farhanhubble/lispmacking/milestone/16) | [#39](https://github.com/farhanhubble/lispmacking/issues/39) | Planned |
+| [M19 — Connected and recursive worlds](https://github.com/farhanhubble/lispmacking/milestone/17) | [#40](https://github.com/farhanhubble/lispmacking/issues/40) | Planned |
 
 The original SectorLISP/Forth direction is preserved: Lisp progressively replaces
 C scaffolding, hardware support extends compiler/runtime interfaces, and persistent
@@ -205,7 +207,15 @@ objects are a longer-term goal beyond source-file loading. See the
 
 ## Tracking conventions
 
+- The private Lispmacking Project is the execution board; repository milestones
+  and roadmap documents complement it rather than replace it.
 - One GitHub milestone corresponds to one technical milestone in this file.
+- Add tracking/deliverable issues to the Project and assign their repository
+  milestone. Newly planned work starts in Backlog; completed issues show Done.
+- Preserve manually chosen open-item status, Area and Priority during reconciliation.
+- Audit with `python3 tools/github/sync_project.py`; use `--apply` to add missing
+  issues and reconcile closed items. This does not overwrite issue-body edits
+  or automatically synchronise changed acceptance criteria.
 - An issue represents one independently reviewable and testable deliverable.
 - Every implementation issue states its acceptance criteria and expected test
   environment.

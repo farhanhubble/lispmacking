@@ -233,7 +233,8 @@ synchronous copied IPC and a trusted DMA driver without an IOMMU. Multicore
 performance remains an open investigation.
 
 M8–M19 are now planned in [detailed milestone definitions](docs/future-milestones.md),
-with matching GitHub milestones. The next work is the interactive workspace (M8)
+with matching GitHub milestones and tracking issues in the private
+[Lispmacking Project](https://github.com/users/farhanhubble/projects/2). The next work is the interactive workspace (M8)
 and ESP32-C3 runtime/portability track (M9). Later milestones preserve separate
 steps for systems Lisp, compiler extensions, persistence, managed worlds, the
 native C3 kernel, vectors, asynchronous services, multicore and accelerators.
