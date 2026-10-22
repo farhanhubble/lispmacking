@@ -6,9 +6,10 @@ track individual deliverables; GitHub milestones group those issues and report
 execution progress. This file remains the source of truth for the intent and
 acceptance criteria of each stage.
 
-The milestones are deliberately sequential. Later work may be explored in
-parallel, but a milestone is complete only when its demonstration and tests run
-on the RV64 QEMU target.
+Milestone numbers identify deliverables; explicit dependencies determine execution
+order. Completion requires the demonstration and tests on each milestone's named
+targets. RV64 uses QEMU; ESP32 and hardware-performance milestones additionally
+require the specified physical-device evidence.
 
 ## Completed foundations
 
@@ -169,6 +170,38 @@ Multicore support is not an M7 acceptance requirement. The discussion of IPC
 latency, throughput, CPU cost, same-core handoffs, and cross-core overlap is
 tracked as a [future performance investigation](https://github.com/farhanhubble/lispmacking/issues/28). QEMU establishes correctness; claims about hardware performance need
 measurements on the target hardware.
+
+## Planned milestones M8–M19
+
+The [detailed milestone definitions](future-milestones.md) are part of this roadmap
+and specify outcome, dependencies, scope, acceptance criteria, validation targets
+and exclusions. M0–M7 remain complete. Every milestone below is planned.
+
+M8 and M9 can begin together. M14 follows the C3 runtime and native compiler;
+M15 follows compiler extensibility and does not need multicore. Persistence,
+managed worlds, asynchronous services and multicore remain distinct milestones.
+C3 support is RISC-V only; IDF runtime bring-up and our native kernel port are
+separate deliverables. Advanced hardware features are optional target capabilities.
+
+| Milestone | Status |
+|---|---|
+| [M8 — Interactive Lisp workspace](https://github.com/farhanhubble/lispmacking/milestone/6) | Planned |
+| [M9 — ESP32-C3 runtime](https://github.com/farhanhubble/lispmacking/milestone/7) | Planned |
+| [M10 — Native systems Lisp](https://github.com/farhanhubble/lispmacking/milestone/8) | Planned |
+| [M11 — Language and compiler extensibility](https://github.com/farhanhubble/lispmacking/milestone/9) | Planned |
+| [M12 — Persistent language workspace](https://github.com/farhanhubble/lispmacking/milestone/10) | Planned |
+| [M13 — Managed worlds and service lifecycle](https://github.com/farhanhubble/lispmacking/milestone/11) | Planned |
+| [M14 — Native ESP32-C3 kernel](https://github.com/farhanhubble/lispmacking/milestone/12) | Planned |
+| [M15 — Vector/SIMD execution](https://github.com/farhanhubble/lispmacking/milestone/13) | Planned |
+| [M16 — Asynchronous services](https://github.com/farhanhubble/lispmacking/milestone/14) | Planned |
+| [M17 — Multicore execution and measurement](https://github.com/farhanhubble/lispmacking/milestone/15) | Planned |
+| [M18 — First accelerator package](https://github.com/farhanhubble/lispmacking/milestone/16) | Planned |
+| [M19 — Connected and recursive worlds](https://github.com/farhanhubble/lispmacking/milestone/17) | Planned |
+
+The original SectorLISP/Forth direction is preserved: Lisp progressively replaces
+C scaffolding, hardware support extends compiler/runtime interfaces, and persistent
+objects are a longer-term goal beyond source-file loading. See the
+[Design Seed](https://app.notion.com/p/401e22127fa68169a4f1d00386593532).
 
 ## Tracking conventions
 
