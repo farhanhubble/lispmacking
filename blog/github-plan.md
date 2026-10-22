@@ -73,7 +73,7 @@ subject is complete.
 
 ### Article 6 — Crossing the Privilege Boundary
 
-- [ ] Hold the article until M6 page tables, supervisor mode and traps have an
+- [x] Hold the article until M6 page tables, supervisor mode and traps have an
   end-to-end QEMU demonstration.
 - [ ] Capture a real privilege transition and fault.
 - [ ] Diagram the trap path and page permissions.
@@ -81,7 +81,7 @@ subject is complete.
 
 ### Article 7 — Two Worlds, One Endpoint
 
-- [ ] Hold the article until the M6 two-world capability/IPC demonstration.
+- [x] Hold the article until the M6 two-world capability/IPC demonstration.
 - [ ] Use the capability graph as the running example.
 - [ ] Capture permitted communication and a denied ambient access.
 - [ ] Draft, review and publish from implemented evidence.
@@ -93,3 +93,10 @@ subject is complete.
 - [ ] Capture the real VirtIO-backed operation.
 - [ ] Compare the trusted core before and after moving device policy out.
 - [ ] Draft, review and publish from implemented evidence.
+
+## M6 implementation evidence
+
+The implementation prerequisites for Articles 6 and 7 are satisfied by
+[710b540](https://github.com/farhanhubble/lispmacking/commit/710b5407b5aacaba619348958af984a41b7110e3).
+See [the architecture and acceptance evidence](../docs/microkernel.md).
+Writing, article-specific captures, diagrams, review, and publication remain open.

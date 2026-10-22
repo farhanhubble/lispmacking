@@ -145,6 +145,25 @@ hardware-specific devices.
 Acceptance demonstration: a user-space service handles a real VirtIO-backed
 operation without adding that device policy to the microkernel.
 
+### M7 implementation tracking
+
+Status: planned; implementation has not started.
+
+- [M7: Define service requests, completions, and buffer ownership](https://github.com/farhanhubble/lispmacking/issues/24)
+- [M7: Move console output into an isolated service](https://github.com/farhanhubble/lispmacking/issues/25)
+- [M7: Implement an isolated VirtIO block service](https://github.com/farhanhubble/lispmacking/issues/26)
+- [M7: Add end-to-end service acceptance and documentation](https://github.com/farhanhubble/lispmacking/issues/27)
+
+The proposed integration demonstration reads Lisp source through a block service,
+evaluates it in an isolated world, and prints through the console service.
+Service protocols should leave room for batching and asynchronous completions,
+with explicit buffer ownership and separately documented DMA authority.
+
+Multicore support is not an M7 acceptance requirement. The discussion of IPC
+latency, throughput, CPU cost, same-core handoffs, and cross-core overlap is
+tracked as a [future performance investigation](https://github.com/farhanhubble/lispmacking/issues/28). QEMU establishes correctness; claims about hardware performance need
+measurements on the target hardware.
+
 ## Tracking conventions
 
 - One GitHub milestone corresponds to one technical milestone in this file.

@@ -14,8 +14,8 @@ written from the boundary between what exists and what is planned.
 | 3 | The Privilege of Knowing an Address | Integer and memory primitives become dangerous at the boundary, not in arithmetic itself | Planned | Bootstrap boundary diagram; rejection cases |
 | 4 | The Day Lisp Wrote a RISC-V Instruction | Lisp interpreted by C can emit a native function that later runs on the CPU | Draft | Compiler pipeline; native QEMU proof |
 | 5 | This Is Not a Microkernel Yet | Running on bare metal and running native code do not provide isolation | Planned | Current-vs-M6 privilege diagram |
-| 6 | Crossing the Privilege Boundary | Page tables and traps turn conventions into enforced boundaries | Future M6 | Trap timeline; page-table walk |
-| 7 | Two Worlds, One Endpoint | Capability-scoped IPC can connect isolated Lisp worlds without ambient authority | Future M6 | Capability graph; two-world demo |
+| 6 | Crossing the Privilege Boundary | Page tables and traps turn conventions into enforced boundaries | M6 evidence available; writing pending | Trap timeline; page-table walk |
+| 7 | Two Worlds, One Endpoint | Capability-scoped IPC can connect isolated Lisp worlds without ambient authority | M6 evidence available; writing pending | Capability graph; two-world demo |
 | 8 | The Driver Does Not Belong in the Kernel | A VirtIO service can own device policy outside the privileged core | Future M7 | VirtIO request path; service terminal trace |
 
 ## Season-level arc
