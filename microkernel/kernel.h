@@ -6,9 +6,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef SERVICES
+#define WORLD_COUNT 3
+#define CAP_COUNT 5
+#define ENDPOINT_COUNT 4
+#else
 #define WORLD_COUNT 2
 #define CAP_COUNT 4
 #define ENDPOINT_COUNT 2
+#endif
 
 typedef struct {
     uint64_t x[32], pc, status;
@@ -36,6 +42,10 @@ _Noreturn void kernel_fail(const char *s);
 _Noreturn void kernel_finish(void);
 void worlds_reset(unsigned scenario);
 void grant(unsigned world, unsigned slot, enum Right right, unsigned object);
+#ifdef SERVICES
+void grant_device(unsigned world, uintptr_t address);
+void grant_dma(unsigned world);
+#endif
 void retire(unsigned world, enum State state);
 void demo_start(void);
 void demo_progress(void);

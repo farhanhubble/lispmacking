@@ -143,3 +143,11 @@ rendezvous IPC. User adapters expose no privileged bootstrap callbacks.
 denials, actual timer preemption, forbidden memory and CSR accesses, and peer
 survival after faults. See [Microkernel boundary](microkernel.md) for the
 memory map, syscall ABI, static boot policy, and remaining limitations.
+
+## M7 device services
+
+The separate `services/` target reuses the M6 supervisor kernel with three worlds
+and selective device mappings. Normal UART and VirtIO operations execute in
+user services, with a private DMA page for the trusted block driver. See
+[User-space services](services.md) for the protocol, DMA trust boundary, tests,
+and fixed-topology limitations.

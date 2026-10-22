@@ -134,7 +134,7 @@ The M4/M5 machine-mode laboratory remains a separate target. Console output is
 still a privileged diagnostic facility. See [Microkernel boundary](microkernel.md)
 for the ABI, memory layout, evidence, and remaining limitations.
 
-## Planned milestones
+## Completed user-space services
 
 ### Milestone 7 — User-space services
 
@@ -147,17 +147,23 @@ operation without adding that device policy to the microkernel.
 
 ### M7 implementation tracking
 
-Status: planned; implementation has not started.
+Status: complete for the bounded RV64 QEMU target.
 
 - [M7: Define service requests, completions, and buffer ownership](https://github.com/farhanhubble/lispmacking/issues/24)
 - [M7: Move console output into an isolated service](https://github.com/farhanhubble/lispmacking/issues/25)
 - [M7: Implement an isolated VirtIO block service](https://github.com/farhanhubble/lispmacking/issues/26)
 - [M7: Add end-to-end service acceptance and documentation](https://github.com/farhanhubble/lispmacking/issues/27)
 
-The proposed integration demonstration reads Lisp source through a block service,
-evaluates it in an isolated world, and prints through the console service.
-Service protocols should leave room for batching and asynchronous completions,
-with explicit buffer ownership and separately documented DMA authority.
+`make test-qemu-m7` reads Lisp source through a user-space VirtIO block service,
+evaluates it in an isolated world, and prints through a separate console service.
+All 11 isolation/recovery scenarios and changed-disk/missing-device negative
+controls pass. The hosted and M4–M6 regression suites remain green.
+
+The protocol uses bounded copied payloads with request IDs and explicit completion
+statuses. Device mappings are restricted to their services; DMA remains trusted
+without an IOMMU. This is a synchronous, single-hart, read-only block demonstration,
+not a filesystem or a general driver-restart facility. See [User-space services](services.md)
+for protocol, authority, reproducible evidence, and limitations.
 
 Multicore support is not an M7 acceptance requirement. The discussion of IPC
 latency, throughput, CPU cost, same-core handoffs, and cross-core overlap is

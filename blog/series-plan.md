@@ -16,7 +16,7 @@ written from the boundary between what exists and what is planned.
 | 5 | This Is Not a Microkernel Yet | Running on bare metal and running native code do not provide isolation | Planned | Current-vs-M6 privilege diagram |
 | 6 | Crossing the Privilege Boundary | Page tables and traps turn conventions into enforced boundaries | M6 evidence available; writing pending | Trap timeline; page-table walk |
 | 7 | Two Worlds, One Endpoint | Capability-scoped IPC can connect isolated Lisp worlds without ambient authority | M6 evidence available; writing pending | Capability graph; two-world demo |
-| 8 | The Driver Does Not Belong in the Kernel | A VirtIO service can own device policy outside the privileged core | Future M7 | VirtIO request path; service terminal trace |
+| 8 | The Driver Does Not Belong in the Kernel | A VirtIO service can own device policy outside the privileged core | M7 evidence available; writing pending | VirtIO request path; service terminal trace |
 
 ## Season-level arc
 

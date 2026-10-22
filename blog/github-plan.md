@@ -88,7 +88,7 @@ subject is complete.
 
 ### Article 8 — The Driver Does Not Belong in the Kernel
 
-- [ ] Hold the article until the M7 user-space VirtIO demonstration.
+- [x] Hold the article until the M7 user-space VirtIO demonstration.
 - [ ] Diagram the request path across the service boundary.
 - [ ] Capture the real VirtIO-backed operation.
 - [ ] Compare the trusted core before and after moving device policy out.
@@ -100,3 +100,9 @@ The implementation prerequisites for Articles 6 and 7 are satisfied by
 [710b540](https://github.com/farhanhubble/lispmacking/commit/710b5407b5aacaba619348958af984a41b7110e3).
 See [the architecture and acceptance evidence](../docs/microkernel.md).
 Writing, article-specific captures, diagrams, review, and publication remain open.
+
+## M7 implementation evidence
+
+Article 8 now has a working user-space VirtIO demonstration: `make test-qemu-m7`.
+See [service architecture and evidence](../docs/services.md). Article-specific
+captures, diagrams, writing, review, and publication remain open.

@@ -156,3 +156,8 @@ above is validated.
 Architecture references: [RISC-V supervisor specification](https://docs.riscv.org/reference/isa/v20260120/priv/supervisor.html),
 [RISC-V machine specification](https://docs.riscv.org/reference/isa/v20260120/priv/machine.html),
 and [QEMU virt platform](https://www.qemu.org/docs/master/system/riscv/virt.html).
+
+## Following milestone
+
+M7 now provides a separate three-world service target. The M6 demonstration
+and its 13 scenarios remain available unchanged. See [User-space services](services.md).

@@ -19,7 +19,7 @@ comparison of the two environments.
 
 ## Current status
 
-Milestones 0 through 6 are implemented:
+Milestones 0 through 7 are implemented:
 
 - RISC-V cross-toolchain and QEMU environment validated;
 - bare-metal RV64 startup, stack initialization, `.bss` clearing, and UART;
@@ -33,7 +33,8 @@ Milestones 0 through 6 are implemented:
 - validated execution of generated Lisp functions under QEMU;
 - source-level debugging through QEMU's GDB stub;
 - a separate S-mode microkernel target with two isolated U-mode Lisp worlds,
-  timer-driven scheduling, and capability-checked IPC.
+  timer-driven scheduling, and capability-checked IPC;
+- isolated console and VirtIO block services, loading and evaluating Lisp from disk.
 
 An example QEMU session:
 
@@ -139,11 +140,21 @@ make test-qemu-m6       # run all 13 bounded acceptance scenarios
 M6 builds `build/microkernel/kernel.elf` and embeds a separately linked user
 image. Python 3 is required for the build helpers and acceptance runner.
 
+### User-space device services (M7)
+
+```sh
+make run-services      # disk -> isolated Lisp evaluator -> console service
+make test-qemu-m7       # 11 scenarios and two negative controls
+```
+
+See [User-space services](docs/services.md) for the request protocol, device
+permissions, DMA trust boundary, and test evidence.
+
 ## Testing
 
 ```sh
 make test        # hosted reader/evaluator/printer tests
-make test-qemu   # M4/M5 bootstrap tests plus M6 isolation/IPC acceptance
+make test-qemu   # M4/M5 bootstrap, M6 isolation, M7 device services
 ```
 
 The QEMU test checks ordinary evaluation, integer overflow, page allocation,
@@ -173,6 +184,7 @@ enter the Lisp prompt after startup.
 boot/                 RISC-V entry point and linker script
 kernel/               bare-metal REPL entry
 microkernel/          S-mode kernel, U-mode adapter, boot and trap paths
+services/             U-mode console/VirtIO services and M7 acceptance policy
 platform/hosted/      standard C allocation and terminal adapter
 platform/riscv64/     QEMU UART, bump allocator, and shutdown adapter
 vm/                   portable object model, reader, evaluator, and printer
@@ -215,8 +227,10 @@ mapping is broad and RWX, and console output remains in the kernel.
 
 ## Roadmap
 
-The next milestone is M7: isolated user-space services and VirtIO drivers.
-M6 now provides the initial page-table, scheduling, IPC, and capability boundary.
+M7 is complete for the bounded QEMU target: three static worlds, isolated console
+and read-only VirtIO block services, and disk-loaded Lisp evaluation. It uses
+synchronous copied IPC and a trusted DMA driver without an IOMMU. Multicore
+performance remains an open investigation; no next numbered milestone is set.
 
 See the [project roadmap](docs/roadmap.md) for milestone definitions, current
 status, and acceptance criteria. The original experimental direction is

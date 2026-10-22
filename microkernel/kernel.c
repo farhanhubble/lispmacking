@@ -1,6 +1,12 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 #include "microkernel/kernel.h"
-#include "build/microkernel/image_layout.h"
+#ifndef IMAGE_LAYOUT_HEADER
+#define IMAGE_LAYOUT_HEADER "build/microkernel/image_layout.h"
+#endif
+#include IMAGE_LAYOUT_HEADER
+#ifdef SERVICES
+#include "services/protocol.h"
+#endif
 
 enum {
     PTE_V = 1,
@@ -22,7 +28,12 @@ static _Alignas(PAGE) unsigned char memory[WORLD_COUNT][WORLD_SIZE];
 static _Alignas(PAGE) uint64_t roots[WORLD_COUNT][512];
 static _Alignas(PAGE) uint64_t lower[WORLD_COUNT][512];
 static _Alignas(PAGE) uint64_t leaves[WORLD_COUNT][512];
-static _Alignas(PAGE) uint64_t devices[512];
+static _Alignas(PAGE) uint64_t devices[WORLD_COUNT][512];
+#ifdef SERVICES
+static _Alignas(PAGE) unsigned char dma_page[PAGE];
+static _Alignas(PAGE) uint64_t dma_leaves[WORLD_COUNT][512];
+
+#endif
 static _Alignas(PAGE) uint64_t test_device[512];
 
 typedef struct {
@@ -49,7 +60,14 @@ static uint64_t pte(uintptr_t address, uint64_t flags)
 
 static void putc(char c)
 {
-    volatile unsigned char *uart = (void *)0x10000000UL;
+    uintptr_t address = 0x10000000UL;
+#ifdef SERVICES
+    uintptr_t satp;
+    __asm__ volatile("csrr %0, satp" : "=r"(satp));
+    if (satp)
+        address = 0x10010000UL; /* S-only alias; SUM stays disabled. */
+#endif
+    volatile unsigned char *uart = (void *)address;
     while (!(uart[5] & 32)) {
     }
     uart[0] = (unsigned char)c;
@@ -85,7 +103,11 @@ _Noreturn void kernel_fail(const char *s)
 
 _Noreturn void kernel_finish(void)
 {
+#ifdef SERVICES
+    kernel_text("M7: PASS\n");
+#else
     kernel_text("M6: PASS\n");
+#endif
     *(volatile uint32_t *)0x100000UL = 0x5555;
     for (;;)
         __asm__ volatile("wfi");
@@ -125,6 +147,28 @@ void grant(unsigned world, unsigned slot, enum Right right, unsigned object)
         endpoints[object].receiver = (int)world;
 }
 
+#ifdef SERVICES
+/* Boot-time authority: mappings are fixed, page-aligned, RW and non-executable.
+ * Device policy and VirtIO register operations remain in user space. */
+void grant_device(unsigned world, uintptr_t address)
+{
+    if (world >= WORLD_COUNT || (address != UART_BASE && address != BLOCK_BASE))
+        kernel_fail("invalid device grant");
+    devices[world][(address - UART_BASE) / PAGE] =
+        pte(address, LEAF | PTE_U | PTE_R | PTE_W);
+}
+
+void grant_dma(unsigned world)
+{
+    if (world >= WORLD_COUNT)
+        kernel_fail("invalid DMA grant");
+    lower[world][DMA_VA >> 21] = pte((uintptr_t)dma_leaves[world], PTE_V);
+    dma_leaves[world][(DMA_VA >> 12) & 511] =
+        pte((uintptr_t)dma_page, LEAF | PTE_U | PTE_R | PTE_W);
+    threads[world].frame.x[13] = (uintptr_t)dma_page;
+}
+#endif
+
 void worlds_reset(unsigned scenario)
 {
     __asm__ volatile("csrw satp, zero; sfence.vma zero, zero" ::: "memory");
@@ -134,6 +178,12 @@ void worlds_reset(unsigned scenario)
     zero(lower, sizeof(lower));
     zero(leaves, sizeof(leaves));
     zero(memory, sizeof(memory));
+    zero(devices, sizeof(devices));
+#ifdef SERVICES
+    /* Demo resets only after the driver has quiesced the device. */
+    zero(dma_page, sizeof(dma_page));
+    zero(dma_leaves, sizeof(dma_leaves));
+#endif
     size_t image_size = (size_t)(user_image_end - user_image_start);
     if (image_size >= STACK_GUARD - USER_BASE || USER_RO_END <= USER_BASE ||
         USER_RO_END >= STACK_GUARD || (USER_RO_END & (PAGE - 1)))
@@ -148,7 +198,7 @@ void worlds_reset(unsigned scenario)
         roots[id][2] = pte(0x80000000UL, LEAF | PTE_R | PTE_W | PTE_X);
         roots[id][0] = pte((uintptr_t)lower[id], PTE_V);
         lower[id][0] = pte((uintptr_t)test_device, PTE_V);
-        lower[id][128] = pte((uintptr_t)devices, PTE_V);
+        lower[id][128] = pte((uintptr_t)devices[id], PTE_V);
         lower[id][2] = pte((uintptr_t)leaves[id], PTE_V);
         for (unsigned j = 0; j < 512; ++j) {
             uintptr_t va = USER_BASE + j * PAGE;
@@ -158,12 +208,16 @@ void worlds_reset(unsigned scenario)
             flags |= va < USER_RO_END ? PTE_X : PTE_W;
             leaves[id][j] = pte((uintptr_t)&memory[id][j * PAGE], flags);
         }
+        devices[id][0] = pte(0x10000000UL, LEAF | PTE_R | PTE_W);
+#ifdef SERVICES
+        devices[id][16] = pte(0x10000000UL, LEAF | PTE_R | PTE_W);
+#endif
         threads[id].state = RUNNABLE;
         threads[id].frame.pc = USER_ENTRY;
         threads[id].frame.x[2] = USER_TOP;
         threads[id].frame.x[10] = id;
         threads[id].frame.x[11] = scenario;
-        threads[id].peer_physical = (uintptr_t)memory[1 - id];
+        threads[id].peer_physical = (uintptr_t)memory[(id + 1) % WORLD_COUNT];
         threads[id].frame.x[12] = threads[id].peer_physical;
     }
     current = WORLD_COUNT - 1;
@@ -307,9 +361,12 @@ _Noreturn void supervisor_main(void)
     __asm__ volatile("csrw stvec, %0" ::"r"(supervisor_trap));
     __asm__ volatile("csrw sie, %0" ::"r"(2UL));
     /* Only the UART and shutdown device need S-mode MMIO mappings. */
-    devices[0] = pte(0x10000000UL, LEAF | PTE_R | PTE_W);
     test_device[256] = pte(0x100000UL, LEAF | PTE_R | PTE_W);
+#ifdef SERVICES
+    kernel_text("M7: supervisor kernel\n");
+#else
     kernel_text("M6: supervisor kernel\n");
+#endif
     demo_start();
     restore_user(choose(true));
 }
